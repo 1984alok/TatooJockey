@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#999DA1</color>
+    <color name="colorPrimaryDark">#525C63</color>
+    <color name="colorAccent">#009688</color>
+    <color name="black_overlay">#66000000</color>
+
+
+    <color name="language_dialog_background">#EFEFEF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="orange">#FF9933</color>
+    <color name="light_blue">#603CB8E6</color>
+    <color name="grey">#EBEBEB</color>
+    <!--<color name="base_color">#12A2E8</color>-->
+    <color name="background_color">#F2F2F2</color>
+    <color name="hint_color">#DDDDDD</color>
+    <color name="reader_bottom_text_color">#6a6868</color>
+    <color name="reader_bottom_background">#E6E6E6</color>
+    <color name="progress_default_circle_color">#80222222</color>
+    <color name="light_grey">#CCCCCC</color>
+    <color name="dark_grey">#666666</color>
+    <color name="more_dark_grey">#434343</color>
+    <color name="grid_text_color">#626262</color>
+    <color name="book_list_text_color">#4d4d4d</color>
+    <color name="author_text_color">#a1a1a1</color>
+    <color name="red">#FF2000</color>
+    <color name="tabbing_disable">#CCCCCC</color>
+    <color name="transparent">#00000000</color>
+    <color name="action_bar_stroke">#F8F8F8</color>
+    <color name="action_bar_title_page">#f48933</color>
+    <color name="library_grid_selector">#B2B1B1</color>
+    <color name="transparent_grey">#50000000</color>
+    <color name="stroke_color">#20000000</color>
+    <color name="black_grey">#262626</color>
+    <color name="groupBadgeTextColor">#7C7C7C</color>
+    <color name="listviewPopupSelected">#505050</color>
+    <color name="listviewPopupBackground">#303030</color>
+    <color name="popupTextColor">#FFFFFF</color>
+    <color name="noteDialogBackground">#F2F2F2</color>
+    <color name="annotationTextolor">#36393b</color>
+    <color name="groupStrokeColor">#D9D9D9</color>
+    <color name="groupBackgroundColor">#E8E8E8</color>
+    <color name="dialogStrokeColor">#D0D0D0</color>
+    <color name="expandAllBackground">#7D7D7E</color>
+    <color name="expandAllPressedState">#36393B</color>
+    <color name="expandAllLightBackground">#607D7D7E</color>
+    <color name="overviewDownloadInfoText">#CCCCCC</color>
+
+    <color name="bookshelfBackground">#50000000</color>
+    <color name="listViewSeprator">#C4C4C4</color>
+    <color name="searchTextColor">#383838</color>
+
+    <color name="bookGridBackground">#EEEEEE</color>
+
+    <color name="contextMenuDivider">#444444</color>
+    <color name="txtTimerTextColor">#4b4b4b</color>
+    <color name="overviewImageBackground">#F9F9F9</color>
+    <color name="overviewTitleColor">#333333</color>
+    <color name="overviewTabsBackground">#F2F2F2</color>
+    <color name="overviewDescColor">#666666</color>
+    <color name="listChildTextColor">#666666</color>
+    <color name="settingDialogText">#7D7D7D</color>
+    <color name="seekBarBackground">#D6D3D6</color>
+    <color name="seprator">#DCDCDC</color>
+    <color name="language_text_color">#36393b</color>
+    <color name="settingsBackground">#F8F8F8</color>
+    <color name="sliderInfoTextColor">#333333</color>
+    <color name="readerSeekBarPopUpBackground">#FFFFFF</color>
+    <color name="reader_bottom_text_background">#E6E6E6</color>
+    <color name="loginHintColor">#8F8F8F</color>
+    <color name="bookshelfTabColor">#3d3d3d</color>
+    <color name="subTitleColor">#999999</color>
+    <color name="dottedSolidColor">#EAEAEA</color>
+    <color name="tabsTextColor">#E9E9E9</color>
+    <color name="resultCountZeroTextColor">#A9A9A9</color>
+    <color name="browseBackground">#999999</color>
+    <color name="fileNameColor">#868686</color>
+    <color name="divider_background">#DADADA</color>
+
+    <color name="userInfoTextColor">#7d7d7e</color>
+    <color name="annotationPreview">#7d7d7e</color>
+    <color name="annotationTitle">#36393b</color>
+    <color name="annotationButtons">#3d3d3d</color>
+    <color name="annotationHyperlinkPreviewLabel">#36393B</color>
+    <color name="hyperlinkLabelTextColor">#A2A2A2</color>
+    <color name="hyperlinkchapterBackgroundColor">#EFEFEF</color>
+    <color name="hyperlinkspinnerBorderColor">#D9D9D9</color>
+    <color name="searchViewColor">#E5E5E5</color>
+    <color name="searchChapterColor">#46494C</color>
+    <color name="searchTopicColor">#666666</color>
+    <color name="searchExcerptColor">#8C8C8C</color>
+
+    <color name="searchResultCountColor">#7a7a7a</color>
+
+
+    <!--Overlay used colors -->
+    <color name="semi_transparent">#8C000000</color>
+    <color name="overlay_dot_focus">#12A2E8</color>
+    <color name="overlay_textcolor">#E8A046</color>
+
+    <color name="fileAnnotationNoteText">#7d7d7e</color>
+
+    <color name="highlight_yellow">#f7e59d</color>
+    <color name="highlight_green">#cfeca7</color>
+    <color name="highlight_pink">#e8bbbb</color>
+    <color name="highlight_blue">#b3e0e0</color>
+
+    <!--Feeds used colors -->
+    <color name="annotation_chapter_title_color">#36393b</color>
+    <color name="annotation_chapter_topic_color">#7D7D7D</color>
+    <color name="content_container_background_color">#ebeaea</color>
+    <color name="content_container_background">#f7f7f7</color>
+    <color name="annotation_chapter_filter_divider">#dedede</color>
+    <!--Sign Up success dialog used colors -->
+    <color name="registersuccessTextColor">#70d769</color>
+    <color name="emailVerificationTextColor">#36393b</color>
+    <color name="loginLinkTextColor">#1766d7</color>
+    <color name="searchBackgroundColor">#FFED21</color>
+    <color name="spinnerRowSelected">#93D7ED</color>
+    <color name="titleTextColor">#4E4E4E</color>
+
+</resources>

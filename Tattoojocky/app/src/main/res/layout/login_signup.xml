@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/homepage_bg">
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerInside"
+        android:layout_marginTop="@dimen/land_img_topmargin"/>
+
+    <ViewFlipper
+        android:layout_below="@+id/logo"
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_height="wrap_content"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:background="@color/transparent">
+        <include
+            android:id="@+id/page_one"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            layout="@layout/login_view"/>
+
+        <include
+            android:id="@+id/page_two"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            layout="@layout/signup_view"/>
+    </ViewFlipper>
+
+
+    <include
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        layout="@layout/footer"/>
+
+</RelativeLayout>

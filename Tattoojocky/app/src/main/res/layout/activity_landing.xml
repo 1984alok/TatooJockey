@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="applabindia.com.tattoojocky.LandingActivity"
+    android:background="@drawable/homepage_bg">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerInside"
+        android:layout_marginTop="@dimen/land_img_topmargin"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50dp"
+        android:weightSum="2"
+        android:padding="20dp">
+
+        <Button
+            style="@style/ButtonAppTheme"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:layout_margin="3dp"
+            android:text="@string/action_sign_in"
+            android:textStyle="bold"
+            android:onClick="btnClick"
+            android:id="@+id/btnSignin"/>
+        <Button
+            style="@style/ButtonAppTheme"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:layout_margin="3dp"
+            android:text="@string/action_sign_up"
+            android:textStyle="bold"
+            android:onClick="btnClick"
+            android:id="@+id/btnSignup"/>
+    </LinearLayout>
+    <include
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        layout="@layout/footer"
+        ></include>
+
+
+</RelativeLayout>
