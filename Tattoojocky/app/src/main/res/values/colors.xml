@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#999DA1</color>
+    <color name="colorPrimary">#009688</color>
     <color name="colorPrimaryDark">#525C63</color>
     <color name="colorAccent">#009688</color>
     <color name="black_overlay">#66000000</color>
+    <color name="style_color_primary">#2d5d82</color>
+    <color name="style_color_primary_dark">#21425d</color>
+    <color name="style_color_accent">#01bcd5</color>
 
+    <color name="fab_color_pressed">#007787</color>
 
     <color name="language_dialog_background">#EFEFEF</color>
     <color name="white">#FFFFFF</color>
@@ -93,7 +97,7 @@
 
     <color name="searchResultCountColor">#7a7a7a</color>
 
-
+    <color name="blue">#ff33b5e5</color>
     <!--Overlay used colors -->
     <color name="semi_transparent">#8C000000</color>
     <color name="overlay_dot_focus">#12A2E8</color>
@@ -105,6 +109,10 @@
     <color name="highlight_green">#cfeca7</color>
     <color name="highlight_pink">#e8bbbb</color>
     <color name="highlight_blue">#b3e0e0</color>
+
+    <color name="header_green">#4CC417</color>
+    <color name="header_green2">#52D017</color>
+    <color name="header_green3">#B1FB17</color>
 
     <!--Feeds used colors -->
     <color name="annotation_chapter_title_color">#36393b</color>
@@ -119,5 +127,11 @@
     <color name="searchBackgroundColor">#FFED21</color>
     <color name="spinnerRowSelected">#93D7ED</color>
     <color name="titleTextColor">#4E4E4E</color>
+
+
+    <color name="btn_default_light_normal">#00000000</color>
+    <color name="btn_default_light_pressed">#40ffffff</color>
+
+    <color name="text_like_counter">#2b5a83</color>
 
 </resources>

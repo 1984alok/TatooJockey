@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/homepage_bg">
+    android:background="@drawable/homepage_bg"
+    android:id="@+id/login_frame">
     <ImageView
         android:id="@+id/logo"
         android:layout_width="wrap_content"
@@ -17,7 +18,7 @@
         android:layout_below="@+id/logo"
         android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_marginTop="50dp"
+        android:layout_centerInParent="true"
         android:layout_height="wrap_content"
         android:paddingRight="10dp"
         android:paddingLeft="10dp"
@@ -33,6 +34,12 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             layout="@layout/signup_view"/>
+
+        <include
+            android:id="@+id/page_three"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            layout="@layout/login_progress"/>
     </ViewFlipper>
 
 

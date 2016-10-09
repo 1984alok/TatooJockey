@@ -4,7 +4,7 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="footer_text">© 2016 ApplabIndia Inc. All rights reserved.</string>
-    <string name="interstitial_full_screen">ca-app-pub-2218708156280350~8276457423</string>
+    <string name="interstitial_ad_unit_id">ca-app-pub-2218708156280350/8276457423</string>
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
@@ -17,9 +17,28 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
+    <string name="confirm_password_notequal">Password and Confirm Password should be same.</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="error_name_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+    <string name="network_error">Please check your network connection.</string>
+    <string name="went_wrong">Something went wrong.Please try agian.</string>
+    <string name="title_activity_home">HomeActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="splash_txt">Relax start enjoy watching your favorites tatoos. Find the contents that match your intrests or sign in for more features.</string>
+
+    <plurals name="likes_count">
+        <item quantity="one">%d like</item>
+        <item quantity="other">%d likes</item>
+    </plurals>
+
 </resources>

@@ -2,10 +2,10 @@ package applabindia.com.tattoojocky;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -20,10 +20,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.text.InputType;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
-import android.text.method.TransformationMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,7 +31,9 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import java.util.ArrayList;
@@ -40,6 +41,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import database.DBAdapter;
+import database.TattocategoryDB;
+import database.UserinfoDb;
+import model.APIError;
+import model.TattoCatagory;
+import model.TattoCatagoryResponse;
+import model.UserModel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import settings.Settingsmanager;
+import utills.CommonUtill;
+import utills.Constants;
+import utills.ErrorUtils;
+import webconnectionhandler.ApiClient;
+import webconnectionhandler.ApiInterface;
+import webconnectionhandler.NetworkStatus;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -54,19 +73,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_READ_CONTACTS = 0;
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$", Pattern.CASE_INSENSITIVE);
     boolean toglge =false;
-
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
+    ApiInterface apiService;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -77,28 +84,48 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private ArrayAdapter<String> emails_adapter;
     private ViewFlipper mViewFlipper;
 
+    private EditText usrName;
+    private EditText passwordSignup;
+    private EditText cPasswordSignup;
+    private AutoCompleteTextView mEmailViewSignup;
+    private RelativeLayout login_frame;
+    private CommonUtill mUtill;
+    private DBAdapter dbAdapter;
+    private UserinfoDb userinfoDb;
+    private TattocategoryDB tattocategoryDB;
+    private Settingsmanager settingsmanager;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_signup);
 
-
+        login_frame = (RelativeLayout)findViewById(R.id.login_frame);
         mViewFlipper = (ViewFlipper)findViewById(R.id.pager);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailViewSignup = (AutoCompleteTextView) findViewById(R.id.emailSignUp);
+
         mEmailView.setThreshold(1);
-        /*emails.add("abc@c.in");
-        emails.add("def@c,in");
-        addEmailsToAutoComplete(emails);*/
+        mEmailViewSignup.setThreshold(1);
         populateAutoComplete();
 
+        apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+
         mPasswordView = (EditText) findViewById(R.id.password);
+
+        passwordSignup = (EditText) findViewById(R.id.passwordSignUp);
+        cPasswordSignup = (EditText) findViewById(R.id.confirm_passwordSignUp);
+        usrName = (EditText) findViewById(R.id.useNamerSignUp);
+
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                if (id == R.id.loginKeyboard || id == EditorInfo.IME_NULL) {
+                    // attemptLogin();
                     return true;
                 }
                 return false;
@@ -109,9 +136,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                if(NetworkStatus.getInstance().isConnected(LoginActivity.this)) {
+                    attemptLogin();
+                }else{
+                    CommonUtill.showSnakbarError(LoginActivity.this,getResources().getString(R.string.network_error),login_frame);
+                }
             }
         });
+
+        Button mSignUp = (Button) findViewById(R.id.email_sign_up_button);
+        mSignUp.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(NetworkStatus.getInstance().isConnected(LoginActivity.this)) {
+                    attemptSignup();
+                }else{
+                    CommonUtill.showSnakbarError(LoginActivity.this,getResources().getString(R.string.network_error),login_frame);
+                }
+            }
+        });
+
+
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
@@ -133,14 +178,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
+
+            if(mViewFlipper.getDisplayedChild()==0) {
+                Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(android.R.string.ok, new View.OnClickListener() {
+                            @Override
+                            @TargetApi(Build.VERSION_CODES.M)
+                            public void onClick(View v) {
+                                requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                            }
+                        });
+            }else{
+                Snackbar.make(mEmailViewSignup, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(android.R.string.ok, new View.OnClickListener() {
+                            @Override
+                            @TargetApi(Build.VERSION_CODES.M)
+                            public void onClick(View v) {
+                                requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                            }
+                        });
+            }
         } else {
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
         }
@@ -167,10 +224,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -209,9 +262,66 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             emails.add(email);
             emails_adapter.notifyDataSetChanged();
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            showProgress(2);
+            // mAuthTask = new UserLoginTask(email, password);
+            // mAuthTask.execute((Void) null);
+            //  doServerCallForCatg();
+            doLogin(email,password);
+        }
+    }
+
+
+    private void attemptSignup() {
+        // Reset errors.
+        mEmailViewSignup.setError(null);
+        passwordSignup.setError(null);
+        cPasswordSignup.setError(null);
+
+        // Store values at the time of the login attempt.
+        String email = mEmailViewSignup.getText().toString();
+        String password = passwordSignup.getText().toString();
+        String userNameTxt = usrName.getText().toString();
+
+
+        boolean cancel = false;
+        View focusView = null;
+
+        if (TextUtils.isEmpty(userNameTxt)) {
+            usrName.setError(getString(R.string.error_name_required));
+            focusView = usrName;
+            cancel = true;
+        }else if (TextUtils.isEmpty(email)) {
+            mEmailViewSignup.setError(getString(R.string.error_field_required));
+            focusView = mEmailViewSignup;
+            cancel = true;
+        } else if (!isEmailValid(email)) {
+            mEmailViewSignup.setError(getString(R.string.error_invalid_email));
+            focusView = mEmailViewSignup;
+            cancel = true;
+        }else if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
+            mPasswordView.setError(getString(R.string.error_invalid_password));
+            focusView = mPasswordView;
+            cancel = true;
+        }else if(!password.equals(cPasswordSignup.getText().toString())) {
+            cPasswordSignup.setError(getString(R.string.confirm_password_notequal));
+            focusView = cPasswordSignup;
+            cancel = true;
+        }
+
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+        } else {
+            // Show a progress spinner, and kick off a background task to
+            // perform the user login attempt.
+            emails.add(email);
+            emails_adapter.notifyDataSetChanged();
+            showProgress(2);
+            // mAuthTask = new UserLoginTask(email, password);
+            // mAuthTask.execute((Void) null);
+            //  doServerCallForCatg();
+            doSignUP(userNameTxt,email,password);
         }
     }
 
@@ -228,37 +338,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Shows the progress UI and hides the login form.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+    private void showProgress(int displayChild) {
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mViewFlipper.setInAnimation(this, R.anim.fadein);
+        mViewFlipper.setOutAnimation(this, R.anim.fadeout);
+        mViewFlipper.setDisplayedChild(displayChild);
     }
 
     @Override
@@ -310,6 +394,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
         mEmailView.setThreshold(1);
         mEmailView.setAdapter(emails_adapter);
+
+        mEmailViewSignup.setThreshold(1);
+        mEmailViewSignup.setAdapter(emails_adapter);
     }
 
 
@@ -323,62 +410,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                // finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 
     public void btnClick(View v){
 
@@ -422,9 +453,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private void showPassword(){
-
-
-
         if(!toglge){
             mPasswordView. setTransformationMethod(new PasswordTransformationMethod());
             //  mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -439,6 +467,211 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     getDrawable( R.drawable.ic_visibility_black_24dp),null);
             mPasswordView.setSelection(mPasswordView.length());
             toglge=false;
+        }
+    }
+
+    private void doServerCallForCatg(){
+
+        Call<TattoCatagory> call = apiService.getTattoCatgory("1");
+        call.enqueue(new Callback<TattoCatagory>() {
+
+
+            @Override
+            public void onResponse(Call<TattoCatagory> call, Response<TattoCatagory> response) {
+                TattoCatagory list = response.body();
+                if(list!=null) {
+                    ArrayList<TattoCatagoryResponse> responseList = (ArrayList<TattoCatagoryResponse>) list.getResponseData();
+                    if(responseList!=null){
+                        createTattoCatg(responseList);
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<TattoCatagory> call, Throwable t) {
+                Toast.makeText(LoginActivity.this,t.toString(),Toast.LENGTH_LONG ).show();
+            }
+        });
+    }
+
+
+    private void doSignUP(String name,String email_Id,String pwd){
+
+        Call<UserModel> call = apiService.createUser(name, email_Id, pwd,"1");
+        call.enqueue(new Callback<UserModel>() {
+            @Override
+            public void onResponse(Call<UserModel> call, Response<UserModel> response) {
+                if(response.isSuccessful()){
+                    UserModel userModel = response.body();
+                    if(userModel.getStatus().equalsIgnoreCase(Constants.RESPONSE_STATUS_TRUE)){
+                        showMessage(userModel.getMessage(),true);
+                        //do next
+                        initUserInfo(userModel.getResponseData(),2);
+
+                    }else{
+                        showProgress(0);
+                        showMessage(userModel.getMessage(),false);
+                    }
+                }else{
+                    Log.i("onFailure Error",response.message());
+                    Toast.makeText(LoginActivity.this,response.message(),Toast.LENGTH_LONG ).show();
+
+                    APIError error = ErrorUtils.parseError(response);
+                    showMessage(error.getMessage(),true);
+                    // … and use it to show error information
+
+                    // … or just log the issue like we’re doing :)
+                    Log.d("error message", error.getMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserModel> call, Throwable t) {
+
+                showProgress(1);
+                showMessage(getResources().getString(R.string.went_wrong),false);
+            }
+        });
+    }
+
+
+
+    private void doLogin (String email_Id,String pwd){
+
+        Call<UserModel> call = apiService.logIn(email_Id,pwd,"Login");
+        call.enqueue(new Callback<UserModel>() {
+            @Override
+            public void onResponse(Call<UserModel> call, Response<UserModel> response) {
+
+                if(response.isSuccessful()){
+                    UserModel userModel = response.body();
+                    if(userModel.getStatus().equalsIgnoreCase(Constants.RESPONSE_STATUS_TRUE)){
+                        //do next
+                        showMessage(userModel.getMessage(),true);
+                        initUserInfo(userModel.getResponseData(),1);
+
+                    }else{
+                        showProgress(0);
+                        showMessage(userModel.getMessage(),false);
+                    }
+                }else{
+                    Log.i("onFailure Error",response.message());
+                    Toast.makeText(LoginActivity.this,response.message(),Toast.LENGTH_LONG ).show();
+
+                    APIError error = ErrorUtils.parseError(response);
+                    showProgress(0);
+                    showMessage(error.getMessage(),false);
+                    // … and use it to show error information
+
+                    // … or just log the issue like we’re doing :)
+                    Log.d("error message", error.getMessage());
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<UserModel> call, Throwable t) {
+                showProgress(0);
+                showMessage(getResources().getString(R.string.went_wrong),false);
+            }
+        });
+
+    }
+
+
+
+    private void showMessage(String msg,boolean isSucees){
+        if(isSucees) {
+            CommonUtill.showSnakbarSucces(LoginActivity.this, msg, login_frame);
+        }else{
+            CommonUtill.showSnakbarError(LoginActivity.this, msg, login_frame);
+        }
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
+    }
+
+
+
+    private void initUserInfo(final UserModel.ResponseData data,int screenView){
+
+        if(data!=null){
+            try {
+                dbAdapter = new DBAdapter(this);
+                dbAdapter.open();
+                userinfoDb = new UserinfoDb(this);
+                userinfoDb.open();
+                if(userinfoDb.createUserinfo(data)!=-1){
+                    settingsmanager = new Settingsmanager(this);
+                    settingsmanager.setLoginStatus(true);
+
+                    new AsyncTask<Void,Void,Void>(){
+
+                        @Override
+                        protected Void doInBackground(Void... params) {
+
+                            doServerCallForCatg();
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
+                                    intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
+                                    intent.putExtra(UserinfoDb.USER_NAME, data.getName());
+                                    intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
+                                    intent.putExtra(UserinfoDb.USER_IMG_PATH,"http://cdn.bestappleprice.com/wp-content/uploads/2015/04/apple-customer-care-india.png");
+                                    startActivity(intent);
+                                }
+                            },1000);
+                        }
+                    }.execute();
+
+                }else{
+                    showMessage("Log in error.",false);
+                    showProgress(screenView);
+                }
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                userinfoDb.close();
+                dbAdapter.close();
+            }
+
+
+        }
+    }
+
+
+
+    private void createTattoCatg(ArrayList<TattoCatagoryResponse> responses){
+
+        try {
+
+            dbAdapter.open();
+            tattocategoryDB = new TattocategoryDB(this);
+            tattocategoryDB.open();
+
+            for (int i = 0; i < responses.size(); i++) {
+
+                tattocategoryDB.createTattooinfo(responses.get(i));
+
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            tattocategoryDB.close();
+            dbAdapter.close();
         }
     }
 }

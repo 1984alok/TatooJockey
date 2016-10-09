@@ -3,19 +3,59 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="applabindia.com.tattoojocky.SplashActivity"
-    android:background="@color/colorPrimaryDark">
-
+    tools:context="applabindia.com.tattoojocky.SplashActivity">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:foreground="@color/semi_transparent">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/tattoo_girls"
+            android:layout_centerInParent="true"
+            android:scaleType="centerCrop"
+            />
+    </FrameLayout>
     <ImageView
+        android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/logo"
         android:layout_centerInParent="true"
-        android:scaleType="centerInside"/>
-   <!-- <include
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
+        android:scaleType="centerCrop"
+        />
+
+    <com.victor.loading.newton.NewtonCradleLoading
+        android:id="@+id/newton_cradle_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        layout="@layout/footer"></include>-->
+        android:layout_marginBottom="30dp"
+        android:visibility="invisible"/>
+
+
+    <LinearLayout
+        android:id="@+id/bootom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="20dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Welcome"
+            android:textSize="@dimen/TextSizeMedium"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:text="@string/splash_txt"
+            android:textSize="@dimen/TextSizeMicro"/>
+    </LinearLayout>
 
 </RelativeLayout>
