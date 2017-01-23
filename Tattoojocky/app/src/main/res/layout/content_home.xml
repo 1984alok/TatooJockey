@@ -13,11 +13,32 @@
     tools:showIn="@layout/app_bar_home"
     >
 
+
+    <ImageView
+        android:id="@+id/refreshImg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_refresh_black_24dp"
+        android:visibility="visible"/>
+
+    <com.victor.loading.rotate.RotateLoading
+        android:id="@+id/progressBarHome"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        app:loading_speed="11"
+        app:loading_width="3dp"
+        app:loading_color="@color/style_color_primary"
+        />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#f8f8f8"
         android:divider="@null"
+        android:visibility="gone"
         android:listSelector="@android:color/transparent"/>
 </RelativeLayout>

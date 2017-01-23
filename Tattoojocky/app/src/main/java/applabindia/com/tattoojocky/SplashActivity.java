@@ -1,39 +1,57 @@
 package applabindia.com.tattoojocky;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.List;
 
 import database.DBAdapter;
+import database.TattocategoryDB;
 import database.UserinfoDb;
+import model.TattoCatagory;
+import model.TattoCatagoryResponse;
 import model.UserModel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import settings.Settingsmanager;
+import utills.CommonUtill;
+import webconnectionhandler.ApiClient;
+import webconnectionhandler.ApiInterface;
+import webconnectionhandler.DBCalls;
+import webconnectionhandler.NetworkStatus;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends AppCompatActivity implements View.OnClickListener{
 
 
-    ImageView logo;
-    Animation anim ;
-    com.victor.loading.newton.NewtonCradleLoading b;
+    private ImageView logo;
+    private Animation anim,fadeAnim;
+    private com.victor.loading.newton.NewtonCradleLoading ploader;
     private Settingsmanager mSettingsmanager;
     private UserinfoDb userinfoDb;
     private DBAdapter dbAdapter;
+    private LinearLayout skipView;
+    private TextView skipTxt,loginTxt;
+    private ApiInterface apiService;
+    private RelativeLayout frameContainer;
+    boolean isSkipClicked;
 
 
     @Override
@@ -41,65 +59,126 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         logo = (ImageView) findViewById(R.id.logo);
-        b  = (com.victor.loading.newton.NewtonCradleLoading)findViewById(R.id.newton_cradle_loading);
+        skipView = (LinearLayout) findViewById(R.id.bootom_skip_view);
+        loginTxt = (TextView) findViewById(R.id.loginTxt);
+        skipTxt = (TextView) findViewById(R.id.skipTxt);
+        ploader = (com.victor.loading.newton.NewtonCradleLoading)findViewById(R.id.newton_cradle_loading);
+        frameContainer = (RelativeLayout)findViewById(R.id.frameContainer);
+        apiService =
+                ApiClient.getClient().create(ApiInterface.class);
         mSettingsmanager = new Settingsmanager(this);
         anim = AnimationUtils.loadAnimation(this,R.anim.bounce);
+        fadeAnim = AnimationUtils.loadAnimation(this,R.anim.fadein);
         logo.startAnimation(anim);
-        anim.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
+        skipTxt.setOnClickListener(this);
+        loginTxt.setOnClickListener(this);
 
+        anim.setAnimationListener(animationListener);
+        fadeAnim.setAnimationListener(animationListener);
+        printHashKey();
+    }
+
+
+    public void printHashKey(){
+        // Add code to print out the key hash
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "applabindia.com.tattoojocky",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
             }
+        } catch (PackageManager.NameNotFoundException e) {
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                b.setVisibility(View.VISIBLE);
-                b.start();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent;
-                        if(!mSettingsmanager.isLoginStatus()) {
-                            intent = new Intent(SplashActivity.this,LoginActivity.class);
-                        }else {
+        } catch (NoSuchAlgorithmException e) {
 
-                            UserModel.ResponseData data = getUserInfo();
-                            if (data != null) {
-                                intent = new Intent(SplashActivity.this, HomeActivity.class);
-                                intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
-                                intent.putExtra(UserinfoDb.USER_NAME, data.getName());
-                                intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
-                                intent.putExtra(UserinfoDb.USER_IMG_PATH,"http://cdn.bestappleprice.com/wp-content/uploads/2015/04/apple-customer-care-india.png");
-                            } else {
-                                intent = new Intent(SplashActivity.this, HomeActivity.class);
-                                intent.putExtra(UserinfoDb.USER_ID, "-1");
-                                intent.putExtra(UserinfoDb.USER_ID, "Guest");
-                                intent.putExtra(UserinfoDb.USER_ID, "");
-                                intent.putExtra(UserinfoDb.USER_IMG_PATH,"");
-                            }
-                        }
+        }
+    }
 
-                        startActivity(intent);
+    Animation.AnimationListener animationListener = new Animation.AnimationListener() {
+        @Override
+        public void onAnimationStart(Animation animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+
+            if (animation==anim){
+                ploader.setVisibility(View.VISIBLE);
+                ploader.start();
+                if(NetworkStatus.getInstance().isConnected(SplashActivity.this)) {
+                    doServerCallForCatg();
+                }else{
+                    CommonUtill.showSnakbarError(SplashActivity.this,getResources().getString(R.string.network_error),frameContainer);
+                }
+            }else if(animation==fadeAnim){
+
+                skipView.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+
+        }
+    };
+
+
+
+    private void startNextScreen() {
+        if (!mSettingsmanager.isLoginStatus()) {
+            skipView.startAnimation(fadeAnim);
+        } else {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent;
+                    UserModel.ResponseData data = getUserInfo();
+
+                    if (data != null) {
+                        startNextwithValidUserData(data);
+                    } else {
+                        startNextwithBlankUserData();
                     }
-                },5000);
-            }
 
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
+                }
+            }, 5000);
+        }
+    }
 
 
+    private void startNextwithBlankUserData(){
+
+        Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(UserinfoDb.USER_ID, "0");
+        intent.putExtra(UserinfoDb.USER_NAME, "Guest");
+        intent.putExtra(UserinfoDb.USER_EMAIL, "");
+        intent.putExtra(UserinfoDb.USER_IMG_PATH,"");
+        startActivity(intent);
+    }
 
 
+    private void startNextwithValidUserData(UserModel.ResponseData data){
+        Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
+        intent.putExtra(UserinfoDb.USER_NAME, data.getName());
+        intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
+        intent.putExtra(UserinfoDb.USER_IMG_PATH,"http://cdn.bestappleprice.com/wp-content/uploads/2015/04/apple-customer-care-india.png");
+        startActivity(intent);
     }
 
 
     @Override
     protected void onStop() {
         super.onStop();
-       finish();
+        //if(isSkipClicked) {
+            finish();
+       // }
     }
 
 
@@ -113,7 +192,7 @@ public class SplashActivity extends AppCompatActivity {
             return  userinfoDb.getUserinfo();
 
         }catch (Exception e) {
-        e.printStackTrace();
+            e.printStackTrace();
         }finally {
             dbAdapter.close();
             userinfoDb.close();
@@ -122,5 +201,45 @@ public class SplashActivity extends AppCompatActivity {
         return null;
     }
 
+    private void doServerCallForCatg(){
 
+        Call<TattoCatagory> call = apiService.getTattoCatgory("");
+        call.enqueue(new Callback<TattoCatagory>() {
+
+
+            @Override
+            public void onResponse(Call<TattoCatagory> call, Response<TattoCatagory> response) {
+                TattoCatagory mTattoCatagory = response.body();
+                if(mTattoCatagory!=null) {
+                    ArrayList<TattoCatagoryResponse> responseList = (ArrayList<TattoCatagoryResponse>) mTattoCatagory.getResponseData();
+                    if(responseList!=null){
+                        DBCalls.getInstance(SplashActivity.this).createTattooCatg(responseList);
+                        startNextScreen();
+                    }else{
+                        CommonUtill.showSnakbarError(SplashActivity.this,getResources().getString(R.string.went_wrong),frameContainer);
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<TattoCatagory> call, Throwable t) {
+                Toast.makeText(SplashActivity.this,t.toString(),Toast.LENGTH_LONG ).show();
+            }
+        });
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.skipTxt:
+                isSkipClicked = true;
+                startNextwithBlankUserData();
+                break;
+            case R.id.loginTxt:
+                startActivity(new Intent(SplashActivity.this,LoginActivity.class));
+                break;
+        }
+    }
 }

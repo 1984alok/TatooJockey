@@ -10,8 +10,4 @@ import android.view.View;
  */
 public class BaseActivity extends AppCompatActivity{
 
-
-
-
-
 }

@@ -1,9 +1,15 @@
 package applabindia.com.tattoojocky;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -30,29 +36,34 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.FacebookSdk;
+import com.facebook.share.widget.ShareDialog;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.mingle.entity.MenuEntity;
-import com.mingle.sweetpick.BlurEffect;
+import com.mingle.sweetpick.DimEffect;
 import com.mingle.sweetpick.RecyclerViewDelegate;
 import com.mingle.sweetpick.SweetSheet;
 import com.squareup.picasso.Picasso;
+import com.victor.loading.rotate.RotateLoading;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import applabindia.com.tattoojocky.profile.ProfileScreen;
 import applabindia.com.tattoojocky.tattoodetail.DetailActivity;
 import applabindia.com.tattoojocky.tattoodetail.TattooListAdapter;
 import database.DBAdapter;
 import database.TattocategoryDB;
 import database.UserinfoDb;
+import listener.OnLoadMoreListener;
 import model.APIError;
+import model.ResponseModel;
 import model.TattoCatagoryResponse;
 import model.TattooInfo;
 import retrofit2.Call;
@@ -62,9 +73,11 @@ import settings.Settingsmanager;
 import utills.CommonUtill;
 import utills.Constants;
 import utills.ErrorUtils;
+import utills.FeedItemAnimator;
 import utills.Utils;
 import webconnectionhandler.ApiClient;
 import webconnectionhandler.ApiInterface;
+import webconnectionhandler.NetworkStatus;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -74,6 +87,7 @@ public class HomeActivity extends AppCompatActivity
     Toolbar toolbar;
     ImageView ivLogo;
     private MenuItem inboxMenuItem,inboxMenuItemGrid;
+    private Menu menu;
 
     private static final int ANIM_DURATION_TOOLBAR = 300;
     private static final int ANIM_DURATION_FAB = 400;
@@ -93,34 +107,51 @@ public class HomeActivity extends AppCompatActivity
     boolean isLogOut = false;
     private SweetSheet mSweetSheet;
     private DrawerLayout drawer;
-    private FrameLayout container,inFrameLayout;
+
     private HashMap<String,TattoCatagoryResponse> tattocatagMap;
 
+
+    private FrameLayout container,inFrameLayout;
     private RecyclerView mRecyclerView;
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
     private TattooListAdapter mAdapter;
     private boolean isListView;
     private ArrayList<TattooInfo.ResponseDato> tatoInfoList;
     private ApiInterface apiService;
+    private int tattoPagesCount = 0;
+    private String tattooCatId = "";
+
+    private ImageView refreshImg;
+    private RotateLoading progressView;
+    private ProgressDialog dlg;
+    private String userId = "";
+    public static Handler recvMsgHandler;
+
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        dlg = new ProgressDialog(HomeActivity.this);
+        dlg.setMessage("wait...");
+
         isListView = true;
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         ivLogo = (ImageView) findViewById(R.id.ivLogo);
         container = (FrameLayout) findViewById(R.id.container);
         inFrameLayout = (FrameLayout) findViewById(R.id.inerContainer);
-        mStaggeredLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+        refreshImg = (ImageView) findViewById(R.id.refreshImg);
+        progressView = (RotateLoading) findViewById(R.id.progressBarHome);
+
+
         mRecyclerView = (RecyclerView) findViewById(R.id.list);
 
         apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
-        mRecyclerView.setLayoutManager(mStaggeredLayoutManager);
-        mRecyclerView.setHasFixedSize(true); //Data size is fixed - improves performance
 
         tatoInfoList = new ArrayList<TattooInfo.ResponseDato>();
         //  mAdapter = new TattooListAdapter(this,tatoInfoList);
@@ -147,6 +178,11 @@ public class HomeActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView)findViewById(R.id.nav_view);
 
         View headerLayout = navigationView.getHeaderView(0);
+        Menu sideMenu = navigationView.getMenu();
+        MenuItem profileMenuItem = sideMenu.findItem(R.id.nav_profile);
+        MenuItem logOutMenuItem = sideMenu.findItem(R.id.nav_logout);
+
+
         circularImageView = (CircularImageView)headerLayout. findViewById(R.id.usrImg);
         userEmailTxt = (TextView)headerLayout. findViewById(R.id.textViewEmail);
         userNameTxt = (TextView)headerLayout. findViewById(R.id.textViewUSerName);
@@ -186,11 +222,25 @@ public class HomeActivity extends AppCompatActivity
 
         Intent intent = getIntent();
         if (intent!=null){
-            Picasso.with(this).load(intent.getStringExtra(UserinfoDb.USER_IMG_PATH))
-                    .error(R.drawable.ic_user)
-                    .into(circularImageView);
+            String imgPath = intent.getStringExtra(UserinfoDb.USER_IMG_PATH);
+            if(imgPath.equals("")){
+                Picasso.with(this).load(R.drawable.ic_user)
+                        .error(R.drawable.ic_user)
+                        .into(circularImageView);
+            }else{
+
+            }
+
             userNameTxt.setText(intent.getStringExtra(UserinfoDb.USER_NAME));
             userEmailTxt.setText(intent.getStringExtra(UserinfoDb.USER_EMAIL));
+            userId = intent.getStringExtra(UserinfoDb.USER_ID);
+            if(userId!=null&&!userId.equals("0")){
+                profileMenuItem.setTitle("Profile");
+                logOutMenuItem.setVisible(true);
+            }else{
+                profileMenuItem.setTitle("Signup/Login");
+                logOutMenuItem.setVisible(false);
+            }
         }
 
         // Create the InterstitialAd and set the adUnitId (defined in values/strings.xml).
@@ -199,7 +249,32 @@ public class HomeActivity extends AppCompatActivity
         // startTimer();
 
         setupTattoCatagView(getTattoCatg());
+
+        refreshImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(NetworkStatus.getInstance().isConnected(HomeActivity.this)) {
+                    showProgress();
+                    getTattoos(tattooCatId, String.valueOf(++tattoPagesCount),userId);
+                }else{
+                    CommonUtill.showSnakbarError(HomeActivity.this,"Check your network connection.",container);
+                }
+            }
+        });
+
+
         setupFeed();
+
+        //msg recv from detail page
+        recvMsgHandler = new Handler(){
+
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                Toast.makeText(HomeActivity.this,"Got msg",Toast.LENGTH_LONG).show();
+                Log.i("Got msg","msg");
+            }
+        };
     }
 
     private void setupFeed() {
@@ -210,18 +285,42 @@ public class HomeActivity extends AppCompatActivity
             }
         };
         mRecyclerView.setLayoutManager(linearLayoutManager);*/
+        mStaggeredLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL){};
+        mRecyclerView.setLayoutManager(mStaggeredLayoutManager);
+        mRecyclerView.setHasFixedSize(true); //Data size is fixed - improves performance
 
-        mAdapter = new TattooListAdapter(HomeActivity.this,tatoInfoList,isListView);
+        mAdapter = new TattooListAdapter(HomeActivity.this,tatoInfoList,isListView,mRecyclerView);
         // mAdapter.setOnFeedItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
-       /* mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+        mAdapter.setOnItemClickListener(onItemClickListener);
+        mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                FeedContextMenuManager.getInstance().onScrolled(recyclerView, dx, dy);
+            public void onLoadMore() {
+                Log.e("haint", "Load More");
+                tatoInfoList.add(null);
+                // mRecyclerView.setLayoutManager(new LinearLayoutManager(HomeActivity.this));
+                mAdapter.notifyItemInserted(tatoInfoList.size() - 1);
+
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Load more data for reyclerview
+                        getTattoos(tattooCatId,String.valueOf(++tattoPagesCount),userId);
+                    }
+                },1000);
+
+
             }
-        })*/;
-        //  mRecyclerView.setItemAnimator(new FeedItemAnimator());
-        getTattoos("","1");
+        });
+        showProgress();
+        mRecyclerView.setItemAnimator(new FeedItemAnimator());
+        if(NetworkStatus.getInstance().isConnected(this)) {
+            getTattoos(tattooCatId, String.valueOf(++tattoPagesCount),userId);
+        }else{
+            showRefreshImg();
+            CommonUtill.showSnakbarError(this,"Check your network connection.",container);
+        }
     }
 
 
@@ -249,7 +348,7 @@ public class HomeActivity extends AppCompatActivity
 
         mSweetSheet.setMenuList(list);
         mSweetSheet.setDelegate(new RecyclerViewDelegate(true));
-        mSweetSheet.setBackgroundEffect(new BlurEffect(8));
+        mSweetSheet.setBackgroundEffect(new DimEffect(10));
 
         mSweetSheet.setOnMenuItemClickListener(new SweetSheet.OnMenuItemClickListener() {
             @Override
@@ -257,7 +356,8 @@ public class HomeActivity extends AppCompatActivity
                 list.get(position).setSelected(true);
                 ((RecyclerViewDelegate) mSweetSheet.getDelegate()).notifyDataSetChanged();
                 mSweetSheet.toggle();
-                Toast.makeText(HomeActivity.this, menuEntity1.title + "  " + position, Toast.LENGTH_SHORT).show();
+                getTattooInfoById(tattocatagMap.get(menuEntity1.title).getCateId());
+                Toast.makeText(HomeActivity.this, tattocatagMap.get(menuEntity1.title).getCateId(), Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
@@ -275,7 +375,6 @@ public class HomeActivity extends AppCompatActivity
 
 
     private void startNavdrawerAnim(){
-
 
         circularImageView.startAnimation(animImg);
         listner = new Animation.AnimationListener() {
@@ -317,7 +416,7 @@ public class HomeActivity extends AppCompatActivity
         int actionbarSize = Utils.dpToPx(56);
         toolbar.setTranslationY(-actionbarSize);
         ivLogo.setTranslationY(-actionbarSize);
-        //  inboxMenuItem.getActionView().setTranslationY(-actionbarSize);
+        inboxMenuItem.getActionView().setTranslationY(-actionbarSize);
 
         toolbar.animate()
                 .translationY(0)
@@ -327,18 +426,25 @@ public class HomeActivity extends AppCompatActivity
                 .translationY(0)
                 .setDuration(ANIM_DURATION_TOOLBAR)
                 .setStartDelay(400);
-        /*inboxMenuItem.getActionView().animate()
+        inboxMenuItem.getActionView().animate()
                 .translationY(0)
                 .setDuration(ANIM_DURATION_TOOLBAR)
                 .setStartDelay(500)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        //startContentAnimation();
+                        // setupFeed();
                     }
                 })
-                .start();*/
+                .start();
     }
+
+
+
+
+
+
+
 
     private InterstitialAd newInterstitialAd() {
         InterstitialAd interstitialAd = new InterstitialAd(this);
@@ -439,6 +545,7 @@ public class HomeActivity extends AppCompatActivity
         if (isListView) {
             mStaggeredLayoutManager.setSpanCount(2);
             item.setIcon(R.drawable.ic_grid);
+            item.setActionView(R.layout.menu_item_grid);
             item.setTitle("Show as grid");
             isListView = false;
 
@@ -452,6 +559,7 @@ public class HomeActivity extends AppCompatActivity
         supportInvalidateOptionsMenu();
         mAdapter.updateListGridView(isListView);
         mRecyclerView.setAdapter(mAdapter);
+        //mRecyclerView.setItemAnimator(new FeedItemAnimator());
     }
 
     @Override
@@ -475,13 +583,17 @@ public class HomeActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_profile) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+            if(item.getTitle().toString().equalsIgnoreCase("Signup/Login")){
+                startActivity(new Intent(HomeActivity.this,LoginActivity.class));
+               // overridePendingTransition(R.anim.slide_in_likes_counter,R.anim.fade_out);
+            }else{
+                startActivity(new Intent(HomeActivity.this,ProfileScreen.class));
+            }
+        } else if (id == R.id.nav_upload_tattoo) {
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_logout) {
             try {
 
                 dbAdapter.open();
@@ -501,9 +613,7 @@ public class HomeActivity extends AppCompatActivity
 
 
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_noti) {
 
         }
 
@@ -575,64 +685,160 @@ public class HomeActivity extends AppCompatActivity
     TattooListAdapter.OnItemClickListener onItemClickListener = new TattooListAdapter.OnItemClickListener() {
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
-        public void onItemClick(View v, int position) {
-            Intent transitionIntent = new Intent(HomeActivity.this, DetailActivity.class);
-            transitionIntent.putExtra(DetailActivity.EXTRA_PARAM_ID,tatoInfoList.get(position));
-            ImageView placeImage = (ImageView) v.findViewById(R.id.placeImage);
-            LinearLayout placeNameHolder = (LinearLayout) v.findViewById(R.id.placeNameHolder);
+        public void onItemClick(View mView,View v, int position) {
+            TattooInfo.ResponseDato data = tatoInfoList.get(position);
+            switch (mView.getId()){
+                case R.id.placeImage:
+                    startDetailPage(v,position);
+                    break;
+                case R.id.ll_like:
+                case R.id.btnLike:
+                    if(userId!=null&&!userId.equalsIgnoreCase("0")){
+                        callTattoLikeDislikeApi(data.getTattooId(),userId,Constants.LIKE,data,position);
+                        //showSnackbar("Liked!");
+                    }else{
+                        showSnackbar("Please log in first.");
+                    }
+                    break;
+                case R.id.ll_share:
+                case R.id.btnShare:
 
-            View navigationBar = HomeActivity.this.findViewById(android.R.id.navigationBarBackground);
-            View statusBar = findViewById(android.R.id.statusBarBackground);
+                    if(userId!=null&&!userId.equalsIgnoreCase("0")){
+                        int shareCount = Integer.parseInt(data.getShareCount());
+                        shareCount = ++shareCount;
+                        data.setShareCount(String.valueOf(shareCount));
+                        mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_IMAGE_CLICKED);
+                        showSnackbar("Shared!");
+                        FacebookSdk.sdkInitialize(HomeActivity.this);
+                        ShareDialog.show(HomeActivity.this,CommonUtill.share(data.getTattooImage()));
+                    }else{
+                        showSnackbar("Please log in first.");
+                    }
 
-            Pair<View, String> imagePair = Pair.create((View) placeImage, "tImage");
-            Pair<View, String> holderPair = Pair.create((View) placeNameHolder, "tNameHolder");
-            Pair<View, String> navPair = Pair.create(navigationBar, Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
-            Pair<View, String> statusPair = Pair.create(statusBar, Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME);
-            Pair<View, String> toolbarPair = Pair.create((View)toolbar, "tActionBar");
+                    break;
 
-            ArrayList<Pair<View, String>> list = new ArrayList<>();
+                case R.id.ll_dislike:
+                case R.id.btnDisLike:
+                    if(userId!=null&&!userId.equalsIgnoreCase("0")){
+                        callTattoLikeDislikeApi(data.getTattooId(),userId,Constants.DISLIKE,data,position);
+                        // showSnackbar("DisLiked!");
+                    }else{
+                        showSnackbar("Please log in first.");
+                    }
 
-            list.add(imagePair);
-            list.add(holderPair);
-            list.add(toolbarPair);
+                    break;
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                list.add(navPair);
-                list.add(statusPair);
             }
 
-            //remove any views that are null
-            for (ListIterator<Pair<View, String>> iter = list.listIterator(); iter.hasNext();) {
-                Pair pair = iter.next();
-                if (pair.first == null) iter.remove();
-            }
-
-            Pair<View, String>[] sharedElements = list.toArray(new Pair[list.size()]);
-
-            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(HomeActivity.this,sharedElements);
-            ActivityCompat.startActivity(HomeActivity.this, transitionIntent, options.toBundle());
         }
     };
 
 
-    private void getTattoos(String tattooCatId,String pageNo){
 
-        Call<TattooInfo> info = apiService.getTattoInfo(tattooCatId,pageNo);
+    private void shareImgFB(final int position, final TattooInfo.ResponseDato data){
+        new AsyncTask<Void,Void,Void>(){
+            ProgressDialog dlg;
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                if(dlg.isShowing())
+                    dlg.dismiss();
+                showSnackbar("Shared!");
+                int shareCount = Integer.parseInt(data.getShareCount());
+                shareCount = ++shareCount;
+                data.setShareCount(String.valueOf(shareCount));
+                mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_IMAGE_CLICKED);
+            }
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                FacebookSdk.sdkInitialize(HomeActivity.this);
+                ShareDialog.show(HomeActivity.this,CommonUtill.share(data.getTattooImage()));
+                return null;
+            }
+        }.execute();
+    }
+
+
+    private void startDetailPage(View v,int position){
+        Intent transitionIntent = new Intent(HomeActivity.this, DetailActivity.class);
+        transitionIntent.putExtra(DetailActivity.EXTRA_PARAM_ID,tatoInfoList.get(position));
+       // transitionIntent.putExtra(DetailActivity.EXTRA_PARAM_HANDLER,recvMsgHandler);
+        ImageView placeImage = (ImageView) v.findViewById(R.id.placeImage);
+        LinearLayout placeNameHolder = (LinearLayout) v.findViewById(R.id.placeNameHolder);
+
+        View navigationBar = HomeActivity.this.findViewById(android.R.id.navigationBarBackground);
+        View statusBar = findViewById(android.R.id.statusBarBackground);
+
+        Pair<View, String> imagePair = Pair.create((View) placeImage, "tImage");
+        Pair<View, String> holderPair = Pair.create((View) placeNameHolder, "tNameHolder");
+        Pair<View, String> navPair = Pair.create(navigationBar, Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
+        Pair<View, String> statusPair = Pair.create(statusBar, Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME);
+        Pair<View, String> toolbarPair = Pair.create((View)toolbar, "tActionBar");
+
+        ArrayList<Pair<View, String>> list = new ArrayList<>();
+
+        list.add(imagePair);
+        list.add(holderPair);
+        list.add(toolbarPair);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            list.add(navPair);
+            list.add(statusPair);
+        }
+
+        //remove any views that are null
+        for (ListIterator<Pair<View, String>> iter = list.listIterator(); iter.hasNext();) {
+            Pair pair = iter.next();
+            if (pair.first == null) iter.remove();
+        }
+
+        Pair<View, String>[] sharedElements = list.toArray(new Pair[list.size()]);
+
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(HomeActivity.this,sharedElements);
+        ActivityCompat.startActivity(HomeActivity.this, transitionIntent, options.toBundle());
+    }
+
+
+    private void getTattoos(String tattooCatId,String pageNo,String userId){
+        Log.i("calling getTattoos"," pageNo ::" + pageNo + " tattooCatId ::"+tattooCatId);
+        Call<TattooInfo> info = apiService.getTattoInfo(tattooCatId,pageNo,userId);
         info.enqueue(new Callback<TattooInfo>() {
             @Override
             public void onResponse(Call<TattooInfo> call, Response<TattooInfo> response) {
                 if(response.isSuccessful()){
                     TattooInfo tattooInfo = response.body();
                     if(tattooInfo.getStatus().equalsIgnoreCase(Constants.RESPONSE_STATUS_TRUE)){
-                        //do next
-                        tatoInfoList.addAll(tattooInfo.getResponseData());
-                        mAdapter.notifyDataSetChanged();
-                       // mAdapter = new TattooListAdapter(HomeActivity.this,tatoInfoList);
-                       // mRecyclerView.setAdapter(mAdapter);
-                        // mAdapter.setOnItemClickListener(onItemClickListener);
 
+                        removeLoader();
+                        //do next
+                        Log.i("onSuccess msg",response.message()+" tattoPagesCount ::" + tattoPagesCount);
+                        if(tattooInfo.getResponseData().size()>0) {
+                            tatoInfoList.addAll(tattooInfo.getResponseData());
+                            mAdapter.notifyDataSetChanged();
+                            if (mRecyclerView.getVisibility() == View.GONE) {
+                                mRecyclerView.setVisibility(View.VISIBLE);
+                                progressView.setVisibility(View.GONE);
+                                progressView.stop();
+                            }
+
+                            if (tattoPagesCount >= 2) {
+                                mAdapter.setLoaded();
+                            }
+                        }
                     }else{
-                        CommonUtill.showSnakbarError(HomeActivity.this,tattooInfo.getMessage(),container);
+                        CommonUtill.showSnakbarError(HomeActivity.this,tattooInfo.getMessage()
+                                +"."+getResources().getString(R.string.thats_all),container);
+                        removeLoader();
+                        if(tattoPagesCount>=2) {
+                            mAdapter.setLoaded();
+                        }
                     }
                 }else{
                     Log.i("onFailure Error",response.message());
@@ -640,12 +846,24 @@ public class HomeActivity extends AppCompatActivity
                     APIError error = ErrorUtils.parseError(response);
                     CommonUtill.showSnakbarError(HomeActivity.this,error.getMessage(),container);
                     Log.d("error message", error.getMessage());
+                    removeLoader();
+                    if(tattoPagesCount>=2) {
+                        mAdapter.setLoaded();
+                    }
+
                 }
             }
 
             @Override
             public void onFailure(Call<TattooInfo> call, Throwable t) {
+                // if(t!=null){ Log.d("Errror on taatoo info",t.getMessage());}
                 CommonUtill.showSnakbarError(HomeActivity.this,getResources().getString(R.string.went_wrong),container);
+                removeLoader();
+                if(tattoPagesCount>=2) {
+                    mAdapter.setLoaded();
+                }
+
+                showRefreshImg();
             }
         });
 
@@ -654,8 +872,131 @@ public class HomeActivity extends AppCompatActivity
     }
 
 
-    public void showLikedSnackbar() {
-        Snackbar.make(container, "Liked!", Snackbar.LENGTH_SHORT).show();
+    public void showSnackbar(String notification) {
+        Snackbar.make(container, notification, Snackbar.LENGTH_SHORT).show();
     }
+
+
+    private void removeLoader(){
+        if(tattoPagesCount>=2&&tatoInfoList!=null&&(tatoInfoList.size() - 1)>0) {
+            tatoInfoList.remove(tatoInfoList.size() - 1);
+            mAdapter.notifyItemRemoved(tatoInfoList.size());
+        }
+    }
+
+
+    private void getTattooInfoById(String id){
+        if(id!=null) {
+            tattoPagesCount = 0;
+            tattooCatId = id;
+            tatoInfoList.clear();
+            getTattoos(tattooCatId, String.valueOf(++tattoPagesCount),userId);
+        }
+    }
+
+
+
+
+    private void showProgress(){
+        if(mRecyclerView.getVisibility()==View.GONE &&
+                refreshImg.getVisibility()==View.VISIBLE){
+            refreshImg.setVisibility(View.GONE);
+            progressView.setVisibility(View.VISIBLE);
+            progressView.start();
+            tattoPagesCount = 0;
+        }
+    }
+
+    private  void showRefreshImg(){
+        if(mRecyclerView.getVisibility()==View.GONE &&
+                progressView.getVisibility()==View.VISIBLE){
+            refreshImg.setVisibility(View.VISIBLE);
+            progressView.stop();
+            progressView.setVisibility(View.GONE);
+            tattoPagesCount = 0;
+        }
+    }
+
+
+
+    private void doForLike( TattooInfo.ResponseDato data,int position){
+        int likeCount = Integer.parseInt(data.getTattooLikes());
+        // likeCount = ++likeCount;
+        data.setTattooLikes(String.valueOf(++likeCount));
+        data.setIsLiked(1);
+        mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_BUTTON_CLICKED);
+    }
+
+
+    private void doForDislike( TattooInfo.ResponseDato data,int position){
+        int disLikeCount = Integer.parseInt(data.getTattooDislikes());
+        //likeCount = --likeCount;
+        data.setTattooDislikes(String.valueOf(++disLikeCount));
+        data.setIsLiked(0);
+        mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_IMAGE_CLICKED);
+    }
+
+
+    private void callTattoLikeDislikeApi(String tattooId, String userId, final String likeDislike, final TattooInfo.ResponseDato data, final int pos){
+
+        showProgressDlg();
+        Call<ResponseModel> response = apiService.callTatooLikeDislike(tattooId,userId,likeDislike);
+        response.enqueue(new Callback<ResponseModel>() {
+            @Override
+            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+
+                if(response.isSuccessful()){
+                    ResponseModel responseModel = response.body();
+                    if(responseModel.getStatus().equalsIgnoreCase(Constants.RESPONSE_STATUS_TRUE)){
+
+                        hideProgressDlg();
+                        //do next
+                        CommonUtill.showSnakbarError(HomeActivity.this,responseModel.getMessage(),container);
+                        if(likeDislike.equals("1")){
+                            doForLike(data,pos);
+                        }else{
+                            doForDislike(data,pos);
+                        }
+                    }else{
+                        hideProgressDlg();
+                        CommonUtill.showSnakbarError(HomeActivity.this,responseModel.getMessage(),container);
+                    }
+                }else{
+                    Log.i("onFailure Error",response.message());
+
+                    APIError error = ErrorUtils.parseError(response);
+                    if(error!=null) {
+                        CommonUtill.showSnakbarError(HomeActivity.this, error.getMessage(), container);
+
+                        //  Log.d("error message", error.getMessage());
+                    }
+                    hideProgressDlg();
+
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseModel> call, Throwable t) {
+                Log.i("onFailure Error",t.toString());
+                hideProgressDlg();
+            }
+        });
+    }
+
+    private void showProgressDlg(){
+        dlg.show();
+    }
+
+    private void hideProgressDlg(){
+        if(dlg!=null && dlg.isShowing()) {
+            dlg.dismiss();
+        }
+    }
+
+
+
+
+
 
 }

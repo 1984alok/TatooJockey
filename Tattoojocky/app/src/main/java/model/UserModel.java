@@ -96,6 +96,21 @@ public class UserModel {
 
     public class ResponseData {
 
+
+        public String getImage() {
+            return image;
+        }
+
+        public void setImage(String image) {
+            this.image = image;
+        }
+
+        @SerializedName("image")
+        @Expose
+        private String image;
+
+
+
         @SerializedName("user_id")
         @Expose
             private String userId;

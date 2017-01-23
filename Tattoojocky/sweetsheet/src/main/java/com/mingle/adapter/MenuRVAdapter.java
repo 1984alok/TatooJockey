@@ -75,6 +75,7 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.MenuVH> {
             menuVH.iv.setVisibility(View.VISIBLE);
 
             Picasso.with(ctx).load(menuEntity.iconurl)
+                    .error(android.R.drawable.ic_menu_report_image)
                     .into(menuVH.iv);
 
         } else {
@@ -88,6 +89,10 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.MenuVH> {
         }else{
             menuVH.nameTV.setTextColor(menuEntity.titleColor);
         }
+
+
+           // menuVH.itemRl.setBackgroundDrawable(i==0?ctx.getResources().getDrawable(R.drawable.catagory_header_bg):
+            //        ctx.getResources().getDrawable(R.drawable.lv_white_to_gray));
 
 
 

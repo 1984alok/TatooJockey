@@ -1,5 +1,6 @@
 package webconnectionhandler;
 
+import model.ResponseModel;
 import model.TattoCatagory;
 import model.TattooInfo;
 import model.UserModel;
@@ -36,9 +37,29 @@ public interface ApiInterface {
 
 
     //Get tattoos info
+    @FormUrlEncoded
     @POST("tattoos/tattoo")
     Call<TattooInfo> getTattoInfo(
-            @Query("tattoo_cate_id") String tattoo_cate_id,
-            @Query("page_number") String page_number
+            @Field("tattoo_cate_id") String tattoo_cate_id,
+            @Field("page_number") String page_number,
+            @Field("user_id") String user_id
     );
+
+    @FormUrlEncoded
+    @POST("tattoos/rating/")
+    Call<ResponseModel> callTatooLikeDislike(
+            @Field("tattoo_id") String tattoo_id,
+            @Field("user_id") String user_id,
+            @Field("star_count") String star_count
+    );
+
+
+
+    @FormUrlEncoded
+    @POST("user/forgot/")
+    Call<ResponseModel> callForgotPwd(
+            @Field("email") String email
+    );
+
+
 }

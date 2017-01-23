@@ -8,4 +8,7 @@
     <color name="theme_gray">#F5F5F5</color>
     <color name="slider_color_normal">#ffa6a6a6</color>
     <color name="slider_color">#ff969696</color>
+
+    <color name="style_color_primary">#2d5d82</color>
+    <color name="style_color_primary_dark">#21425d</color>
 </resources>

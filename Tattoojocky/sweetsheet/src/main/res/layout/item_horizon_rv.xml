@@ -35,6 +35,7 @@
             android:paddingTop="8dp"
             android:singleLine="true"
             android:text="删除"
+            android:textColor="#FFFFFFFF"
             android:textSize="18sp"/>
     </RelativeLayout>
 </RelativeLayout>

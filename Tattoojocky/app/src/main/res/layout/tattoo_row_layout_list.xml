@@ -30,19 +30,23 @@
             android:ellipsize="marquee"
             android:padding="10dp"
             android:background="@android:color/transparent"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/darker_gray" />
 
-        <utills.SquaredFrameLayout
+        <FrameLayout
             android:id="@+id/vImageRoot"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="140dp"
+            android:padding="8dp"
+            >
 
             <ImageView
                 android:id="@+id/placeImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop" />
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"/>
 
             <View
                 android:id="@+id/vBgLike"
@@ -56,117 +60,58 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="center"
-                android:src="@drawable/ic_heart_outline_white"
+                android:src="@drawable/ic_big_heart"
                 android:visibility="invisible" />
 
-        </utills.SquaredFrameLayout>
+        </FrameLayout>
 
         <!--   <ImageView
                android:id="@+id/ivFeedBottom"
                android:src="@drawable/ic_list"
                android:layout_width="match_parent"
                android:layout_height="wrap_content" />-->
-        <LinearLayout
+      <!--  <LinearLayout
             android:id="@+id/mainHolder"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="?android:selectableItemBackground"
-            android:orientation="horizontal" />
+            android:orientation="horizontal" />-->
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:background="@color/grey"
+            android:layout_height="40dp"
+            android:background="@color/action_bar_stroke"
             android:transitionName="tNameHolder"
-            android:id="@+id/placeNameHolder">
+            android:id="@+id/placeNameHolder"
+            android:orientation="vertical">
 
-            <ImageButton
-                android:id="@+id/btnLike"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_heart_outline_grey" />
-
-            <ImageButton
-                android:id="@+id/btnComments"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@drawable/btn_feed_action"
-                android:src="@drawable/ic_comment_outline_grey"
-                android:visibility="gone"/>
-
-            <ImageButton
-                android:id="@+id/btnMore"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@drawable/btn_feed_action"
-                android:src="@drawable/ic_more_grey"
-                android:visibility="gone"/>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center_vertical|right">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/grey"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical|right">
-
-
-
+                    android:id="@+id/ll_like"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:layout_marginLeft="5dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true">
+                    <ImageButton
+                        android:id="@+id/btnLike"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="@color/transparent"
+                        android:src="@drawable/ic_heart_outline_grey"
+                        />
                     <TextSwitcher
                         android:id="@+id/tsLikesCounter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        android:inAnimation="@anim/slide_in_likes_counter"
-                        android:outAnimation="@anim/slide_out_likes_counter">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="12345454"
-                            android:layout_gravity="center"
-                            android:gravity="center"
-                            android:textSize="@dimen/TextSizeSmallMobile"
-                            android:textColor="@color/text_like_counter" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textColor="@color/text_like_counter" />
-                    </TextSwitcher>
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/like" />
-                </LinearLayout>
-
-                <LinearLayout
-
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical|right"
-                    >
-
-
-
-                    <TextSwitcher
-                        android:id="@+id/tsViewCounter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
                         android:inAnimation="@anim/slide_in_likes_counter"
                         android:outAnimation="@anim/slide_out_likes_counter">
 
@@ -185,29 +130,68 @@
                             android:text=""
                             android:textColor="@color/text_like_counter" />
                     </TextSwitcher>
-                    <ImageView
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/ll_dislike"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center|center_vertical"
+                    android:layout_centerInParent="true">
+                    <ImageButton
+                        android:id="@+id/btnDisLike"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="@color/transparent"
+                        android:src="@drawable/ic_action_dislike"
+                        />
+                    <TextSwitcher
+                        android:id="@+id/tsDsLikesCounter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="3dp"
-                        android:src="@drawable/share" />
+                        android:inAnimation="@anim/slide_in_likes_counter"
+                        android:outAnimation="@anim/slide_out_likes_counter">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="123"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:textSize="@dimen/TextSizeSmallMobile"
+                            android:textColor="@color/text_like_counter" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@color/text_like_counter" />
+                    </TextSwitcher>
                 </LinearLayout>
+
                 <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:layout_marginRight="5dp"
+                    android:layout_alignParentRight="true"
+                    android:id="@+id/ll_share"
+                    android:layout_centerVertical="true">
 
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical|right"
-                    >
-
-
-
-
+                    <ImageButton
+                        android:id="@+id/btnShare"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="@drawable/btn_feed_action"
+                        android:src="@drawable/ic_action_share"
+                        android:visibility="visible"
+                        />
                     <TextSwitcher
                         android:id="@+id/tsShareCounter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
+
                         android:inAnimation="@anim/slide_in_likes_counter"
                         android:outAnimation="@anim/slide_out_likes_counter">
 
@@ -226,14 +210,10 @@
                             android:text=""
                             android:textColor="@color/text_like_counter" />
                     </TextSwitcher>
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/view" />
-
                 </LinearLayout>
-            </LinearLayout>
+            </RelativeLayout>
         </LinearLayout>
-    </LinearLayout>
 
+    </LinearLayout>
 </android.support.v7.widget.CardView>
+

@@ -46,6 +46,7 @@ import database.DBAdapter;
 import database.TattocategoryDB;
 import database.UserinfoDb;
 import model.APIError;
+import model.ResponseModel;
 import model.TattoCatagory;
 import model.TattoCatagoryResponse;
 import model.UserModel;
@@ -94,6 +95,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private UserinfoDb userinfoDb;
     private TattocategoryDB tattocategoryDB;
     private Settingsmanager settingsmanager;
+    private TextView skipTxt,forgotPwdTxtSignViw,forgotPwdTxtSigninViw,txt_forgot_pwd_cancel;
+    private AutoCompleteTextView ed_forgot_pwd;
+    private Button send;
 
 
 
@@ -107,9 +111,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mEmailViewSignup = (AutoCompleteTextView) findViewById(R.id.emailSignUp);
+        ed_forgot_pwd = (AutoCompleteTextView) findViewById(R.id.ed_forgot_pwd_email);
+
+        skipTxt = (TextView)findViewById(R.id.skip);
 
         mEmailView.setThreshold(1);
         mEmailViewSignup.setThreshold(1);
+        ed_forgot_pwd.setThreshold(1);
         populateAutoComplete();
 
         apiService =
@@ -156,6 +164,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        skipTxt.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
 
         mLoginFormView = findViewById(R.id.login_form);
@@ -188,8 +202,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
                             }
                         });
-            }else{
+            }else  if(mViewFlipper.getDisplayedChild()==1){
                 Snackbar.make(mEmailViewSignup, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(android.R.string.ok, new View.OnClickListener() {
+                            @Override
+                            @TargetApi(Build.VERSION_CODES.M)
+                            public void onClick(View v) {
+                                requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                            }
+                        });
+            }else  if(mViewFlipper.getDisplayedChild()==3){
+                Snackbar.make(ed_forgot_pwd, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                         .setAction(android.R.string.ok, new View.OnClickListener() {
                             @Override
                             @TargetApi(Build.VERSION_CODES.M)
@@ -397,6 +420,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mEmailViewSignup.setThreshold(1);
         mEmailViewSignup.setAdapter(emails_adapter);
+
+        ed_forgot_pwd.setThreshold(1);
+        ed_forgot_pwd.setAdapter(emails_adapter);
     }
 
 
@@ -447,6 +473,32 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 showPassword();
                 break;
 
+            case R.id.forgotPwdTxtSignViw:
+            case R.id.forgotPwdTxtSigninViw:
+                mViewFlipper.setInAnimation(this, R.anim.fadein);
+                mViewFlipper.setOutAnimation(this, R.anim.fadeout);
+                // Show The Previous Screen
+                mViewFlipper.setDisplayedChild(3);
+                break;
+
+
+            case R.id.txt_forgot_pwd_cancel:
+                mViewFlipper.setInAnimation(this, R.anim.fadein);
+                mViewFlipper.setOutAnimation(this, R.anim.fadeout);
+                // Show The Previous Screen
+                mViewFlipper.setDisplayedChild(0);
+                break;
+
+            case R.id.frgt_pwd_button:
+
+                if(NetworkStatus.getInstance().isConnected(LoginActivity.this)) {
+                    callForgotPwd();
+                }else{
+                    CommonUtill.showSnakbarError(LoginActivity.this,getResources().getString(R.string.network_error),login_frame);
+                }
+
+                break;
+
         }
     }
 
@@ -472,7 +524,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void doServerCallForCatg(){
 
-        Call<TattoCatagory> call = apiService.getTattoCatgory("1");
+        Call<TattoCatagory> call = apiService.getTattoCatgory("");
         call.enqueue(new Callback<TattoCatagory>() {
 
 
@@ -626,6 +678,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 @Override
                                 public void run() {
                                     Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                                     intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
                                     intent.putExtra(UserinfoDb.USER_NAME, data.getName());
                                     intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
@@ -661,11 +714,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             dbAdapter.open();
             tattocategoryDB = new TattocategoryDB(this);
             tattocategoryDB.open();
-
+            if(tattocategoryDB.getCount()>0){
+                tattocategoryDB.deleteAll_UsrDetails();
+            }
             for (int i = 0; i < responses.size(); i++) {
-
                 tattocategoryDB.createTattooinfo(responses.get(i));
-
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -673,6 +726,75 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             tattocategoryDB.close();
             dbAdapter.close();
         }
+    }
+
+
+
+    private void callForgotPwd(){
+        ed_forgot_pwd.setError(null);
+        // Store values at the time of the login attempt.
+        String email = ed_forgot_pwd.getText().toString();
+
+        boolean cancel = false;
+        View focusView = null;
+
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(email)) {
+            ed_forgot_pwd.setError(getString(R.string.error_field_required));
+            focusView = ed_forgot_pwd;
+            cancel = true;
+        } else if (!isEmailValid(email)) {
+            ed_forgot_pwd.setError(getString(R.string.error_invalid_email));
+            focusView = mEmailView;
+            cancel = true;
+        }
+
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+        } else {
+            // Show a progress spinner, and kick off a background task to
+            // perform the user login attempt.
+            emails.add(email);
+            emails_adapter.notifyDataSetChanged();
+            showProgress(2);
+            // mAuthTask = new UserLoginTask(email, password);
+            // mAuthTask.execute((Void) null);
+            //  doServerCallForCatg();
+            doServercallForgotPwd(email);
+        }
+    }
+
+
+
+    private void doServercallForgotPwd(String emailId){
+        Call<ResponseModel> call = apiService.callForgotPwd(emailId);
+        call.enqueue(new Callback<ResponseModel>() {
+            @Override
+            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                if(response.isSuccessful()) {
+                    ResponseModel model = response.body();
+                    if (model.getStatus().equalsIgnoreCase(Constants.RESPONSE_STATUS_TRUE)) {
+                        showMessage(model.getMessage(), true);
+                        showProgress(0);
+
+                    } else {
+                        showProgress(3);
+                        showMessage(model.getMessage(), false);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseModel> call, Throwable t) {
+                showProgress(3);
+                showMessage(getResources().getString(R.string.went_wrong),false);
+
+            }
+        });
+
     }
 }
 

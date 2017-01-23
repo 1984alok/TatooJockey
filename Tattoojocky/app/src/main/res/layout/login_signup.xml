@@ -40,8 +40,27 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             layout="@layout/login_progress"/>
+        <include
+            android:id="@+id/page_four"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            layout="@layout/forgot_password"/>
     </ViewFlipper>
 
+    <TextView
+        android:id="@+id/skip"
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Skip"
+        android:gravity="center"
+        android:textSize="@dimen/TextSizeMedium"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/pager"
+        android:layout_margin="20dp"
+        android:visibility="gone"
+        android:textColor="@color/white"/>
 
     <include
         android:layout_height="wrap_content"
