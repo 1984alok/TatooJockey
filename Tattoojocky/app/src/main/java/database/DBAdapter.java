@@ -34,7 +34,7 @@ public class DBAdapter {
 
 
 	private static final String CREATE_TABLE_TATTO_CATAGORY =
-			"create table Tat'toCatag (_id integer primary key autoincrement, " //$NON-NLS-1$
+			"create table TattoCatag (_id integer primary key autoincrement, " //$NON-NLS-1$
 					+ TattocategoryDB.TATTO_CATG_ID+ " TEXT," //$NON-NLS-1$
 					+ TattocategoryDB.TATTO_CATG_NAME+ " TEXT," //$NON-NLS-1$
 					+ TattocategoryDB.TATTO_CATG_PARENT_ID+ " TEXT," //$NON-NLS-1$
@@ -94,7 +94,7 @@ public class DBAdapter {
 	}
 
 	/**
-	 * close the db 
+	 * close the db
 	 * return type: void
 	 */
 	public void close()

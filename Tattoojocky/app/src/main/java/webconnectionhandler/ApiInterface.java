@@ -1,13 +1,20 @@
 package webconnectionhandler;
 
+import java.util.Map;
+
 import model.ResponseModel;
 import model.TattoCatagory;
 import model.TattooInfo;
 import model.UserModel;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
+import retrofit2.http.PartMap;
 import retrofit2.http.Query;
 
 /**
@@ -60,6 +67,15 @@ public interface ApiInterface {
     Call<ResponseModel> callForgotPwd(
             @Field("email") String email
     );
+
+
+
+
+    @Multipart
+    @POST("user/update/")
+    Call<ResponseModel> uploadFileWithPartMap(
+            @PartMap() Map<String, RequestBody> partMap,
+            @Part MultipartBody.Part file);
 
 
 }

@@ -46,6 +46,7 @@ import database.DBAdapter;
 import database.TattocategoryDB;
 import database.UserinfoDb;
 import model.APIError;
+import model.ResponseData;
 import model.ResponseModel;
 import model.TattoCatagory;
 import model.TattoCatagoryResponse;
@@ -650,7 +651,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
 
-    private void initUserInfo(final UserModel.ResponseData data,int screenView){
+    private void initUserInfo(final ResponseData data, int screenView){
 
         if(data!=null){
             try {
@@ -682,7 +683,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                     intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
                                     intent.putExtra(UserinfoDb.USER_NAME, data.getName());
                                     intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
-                                    intent.putExtra(UserinfoDb.USER_IMG_PATH,"http://cdn.bestappleprice.com/wp-content/uploads/2015/04/apple-customer-care-india.png");
+                                    intent.putExtra(UserinfoDb.USER_IMG_PATH,data.getImage());
                                     startActivity(intent);
                                 }
                             },1000);

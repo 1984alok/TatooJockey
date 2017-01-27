@@ -4,9 +4,10 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -23,8 +24,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import database.DBAdapter;
-import database.TattocategoryDB;
 import database.UserinfoDb;
+import model.ResponseData;
 import model.TattoCatagory;
 import model.TattoCatagoryResponse;
 import model.UserModel;
@@ -37,6 +38,9 @@ import webconnectionhandler.ApiClient;
 import webconnectionhandler.ApiInterface;
 import webconnectionhandler.DBCalls;
 import webconnectionhandler.NetworkStatus;
+
+import static permission_manager.PermissionHandler.checkIfAlreadyhavePermission;
+import static permission_manager.PermissionHandler.requestForSpecificPermission;
 
 public class SplashActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -54,6 +58,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
     boolean isSkipClicked;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,13 +74,50 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
         mSettingsmanager = new Settingsmanager(this);
         anim = AnimationUtils.loadAnimation(this,R.anim.bounce);
         fadeAnim = AnimationUtils.loadAnimation(this,R.anim.fadein);
-        logo.startAnimation(anim);
         skipTxt.setOnClickListener(this);
         loginTxt.setOnClickListener(this);
 
         anim.setAnimationListener(animationListener);
         fadeAnim.setAnimationListener(animationListener);
-        printHashKey();
+       // printHashKey();
+        requestAllPermission();
+    }
+
+    private void requestAllPermission(){
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!checkIfAlreadyhavePermission(this)) {
+                requestForSpecificPermission(this);
+            } else{
+                //do your work
+                logo.startAnimation(anim);
+            }
+        }else{
+            logo.startAnimation(anim);
+        }
+
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(requestCode == 101){
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // permission was granted, yay! Do the
+                // contacts-related task you need to do.
+                Log.i("Home","onRequestPermissionsResult granted");
+                logo.startAnimation(anim);
+
+            } else {
+
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+                Log.i("Home","onRequestPermissionsResult denied");
+            }
+            return;
+        }
     }
 
 
@@ -136,7 +178,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
                 @Override
                 public void run() {
                     Intent intent;
-                    UserModel.ResponseData data = getUserInfo();
+                    ResponseData data = getUserInfo();
 
                     if (data != null) {
                         startNextwithValidUserData(data);
@@ -162,13 +204,13 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
     }
 
 
-    private void startNextwithValidUserData(UserModel.ResponseData data){
+    private void startNextwithValidUserData(ResponseData data){
         Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
         intent.putExtra(UserinfoDb.USER_NAME, data.getName());
         intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
-        intent.putExtra(UserinfoDb.USER_IMG_PATH,"http://cdn.bestappleprice.com/wp-content/uploads/2015/04/apple-customer-care-india.png");
+        intent.putExtra(UserinfoDb.USER_IMG_PATH,data.getImage());
         startActivity(intent);
     }
 
@@ -183,7 +225,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
 
 
 
-    private UserModel.ResponseData  getUserInfo(){
+    private ResponseData  getUserInfo(){
         try {
             dbAdapter = new DBAdapter(this);
             dbAdapter.open();

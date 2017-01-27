@@ -223,13 +223,9 @@ public class HomeActivity extends AppCompatActivity
         Intent intent = getIntent();
         if (intent!=null){
             String imgPath = intent.getStringExtra(UserinfoDb.USER_IMG_PATH);
-            if(imgPath.equals("")){
-                Picasso.with(this).load(R.drawable.ic_user)
+                Picasso.with(this).load(imgPath)
                         .error(R.drawable.ic_user)
                         .into(circularImageView);
-            }else{
-
-            }
 
             userNameTxt.setText(intent.getStringExtra(UserinfoDb.USER_NAME));
             userEmailTxt.setText(intent.getStringExtra(UserinfoDb.USER_EMAIL));

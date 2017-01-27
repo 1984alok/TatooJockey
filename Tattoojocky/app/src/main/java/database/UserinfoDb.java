@@ -7,6 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import model.ResponseData;
 import model.UserModel;
 
 
@@ -95,7 +96,7 @@ public class UserinfoDb {
 
 
 
-	public long createUserinfo(UserModel.ResponseData info){
+	public long createUserinfo(ResponseData info){
 
 		System.out.println("inserting data into  data base...");
 		ContentValues initialValues = new ContentValues();
@@ -115,13 +116,18 @@ public class UserinfoDb {
 		initialValues.put(USER_IS_NOTI, info.getIsNotification());
 		initialValues.put(USER_JOINDATE, info.getJoinDate());
 		initialValues.put(USER_LAST_LOGIN, info.getLastLogin());
-		initialValues.put(USER_IMG_PATH,"");
+		if(info.getImage().contains("_thumb")) {
+			String img = info.getImage().replace("_thumb","");
+			initialValues.put(USER_IMG_PATH, img);
+		}else{
+			initialValues.put(USER_IMG_PATH, info.getImage());
+		}
 
 		return this.mDb.insert(USERINFO_TABLE, null, initialValues);
 	}
 
 
-	public boolean updateUserinfo(UserModel.ResponseData info){
+	public boolean updateUserinfo(ResponseData info){
 
 		System.out.println("inserting data into  data base...");
 		ContentValues initialValues = new ContentValues();
@@ -141,16 +147,21 @@ public class UserinfoDb {
 		initialValues.put(USER_IS_NOTI, info.getIsNotification());
 		initialValues.put(USER_JOINDATE, info.getJoinDate());
 		initialValues.put(USER_LAST_LOGIN, info.getLastLogin());
-		initialValues.put(USER_IMG_PATH,"");
+		if(info.getImage().contains("_thumb")) {
+			String img = info.getImage().replace("_thumb","");
+			initialValues.put(USER_IMG_PATH, img);
+		}else{
+			initialValues.put(USER_IMG_PATH, info.getImage());
+		}
 		return this.mDb.update(USERINFO_TABLE, initialValues, ROW_ID + " = " + info.getUserId(), null) >0;
 	}
 
 
-	public UserModel.ResponseData getUserinfo() {
+	public ResponseData getUserinfo() {
 
 		String selectQuery = "SELECT * FROM " + USERINFO_TABLE;
 		//ArrayList<UserInfo> nameList = new ArrayList<UserInfo>();
-		UserModel.ResponseData info = new UserModel().new ResponseData();
+		ResponseData info = new ResponseData();
 		Cursor cur = this.mDb.rawQuery(selectQuery, null);
 		if(cur.moveToFirst()){
 			do{
@@ -171,7 +182,7 @@ public class UserinfoDb {
 				info.setIsNotification(cur.getString(12));
 				info.setJoinDate(cur.getString(13));
 				info.setLastLogin(cur.getString(14));
-				//info.setImagePath(cur.getString(6));
+				info.setImage(cur.getString(15));
 
 
 				//nameList.add(info);

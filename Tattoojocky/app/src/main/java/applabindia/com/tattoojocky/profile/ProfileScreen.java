@@ -1,11 +1,13 @@
 package applabindia.com.tattoojocky.profile;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.AppBarLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.Menu;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
@@ -14,13 +16,15 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import applabindia.com.tattoojocky.BaseActivity;
 import applabindia.com.tattoojocky.R;
 import database.DBAdapter;
 import database.UserinfoDb;
 import de.hdodenhof.circleimageview.CircleImageView;
+import model.ResponseData;
 import model.UserModel;
 
-public class ProfileScreen extends AppCompatActivity
+public class ProfileScreen extends BaseActivity
         implements AppBarLayout.OnOffsetChangedListener,View.OnClickListener {
 
     private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR  = 0.9f;
@@ -41,6 +45,8 @@ public class ProfileScreen extends AppCompatActivity
             stateTxt,cityTxt,aboutMeTxt,userName;
     private DBAdapter dbAdapter;
     private UserinfoDb mUserinfoDb;
+    private ResponseData userInfo;
+    private FloatingActionButton editButton;
 
 
     @Override
@@ -73,19 +79,22 @@ public class ProfileScreen extends AppCompatActivity
         cityTxt = (TextView) findViewById(R.id.profileCity);
         aboutMeTxt = (TextView) findViewById(R.id.prompt_about_me);
         userName = (TextView) findViewById(R.id.profile_usrName);
+        editButton = (FloatingActionButton) findViewById(R.id.fab);
 
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
         mUserinfoDb = new UserinfoDb(this);
         mUserinfoDb.open();
-        setData(mUserinfoDb.getUserinfo());
+        userInfo = mUserinfoDb.getUserinfo();
+        setData(userInfo);
 
         backImg.setOnClickListener(this);
+        editButton.setOnClickListener(this);
 
     }
 
 
-    private void setData(UserModel.ResponseData model){
+    private void setData(ResponseData model){
 
         userName.setText(model.getName());
         mTitle.setText(model.getName());
@@ -172,11 +181,20 @@ public class ProfileScreen extends AppCompatActivity
         v.startAnimation(alphaAnimation);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onClick(View v) {
         switch (v.getId()){
             case  R.id.main_imageview_backbutton:
                 finish();
+                break;
+            case  R.id.fab:
+                Intent i = new Intent(ProfileScreen.this, ProfileEditActivity.class);
+                i.putExtra("USER", userInfo);
+                startActivity(i);
+                overridePendingTransition(R.anim.in_from_right,R.anim.out_to_left);
+               // i.putExtra(EXTRA_SAMPLE, sample);
+                //transitionTo(i);
                 break;
 
         }
