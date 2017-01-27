@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="8dp"
+    app:cardElevation="8dp"
+    app:contentPaddingLeft="16dp"
+    app:contentPaddingRight="16dp"
+    app:contentPaddingTop="5dp"
+    app:contentPaddingBottom="10dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+
+
+            <EditText
+                android:layout_marginTop="20dp"
+                android:id="@+id/edProfileEditAbtMe"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:background="@drawable/home_bag"
+                android:hint="@string/prompt_about_me"
+                android:inputType="text"
+                android:gravity="top"
+                android:padding="15dp"
+                android:textSize="@dimen/TextSizeLarge"
+                android:textColorHint="@color/colorPrimary"
+                android:textColor="@color/black"
+                android:singleLine="true"
+                />
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+           android:layout_marginTop="40dp">
+
+            <ImageView
+                android:id="@+id/img_prev_p4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_action_previous"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:padding="10dp"/>
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/editProfile_Save"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="20dp"
+                android:textSize="@dimen/TextSizeLarge"
+                android:textColor="@color/white"
+                android:padding="10dp"
+                android:layout_alignParentRight="true"
+                android:background="@color/action_bar_title_page"
+                android:text="Upadate"/>
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
