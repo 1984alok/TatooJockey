@@ -212,4 +212,14 @@ public class Utils {
     }
 
 
+    public static void deleteFile(File file) {
+        if(file.exists()){
+            file.delete();
+        }
+    }
+
+    public static File getFile(Context context){
+        //return new File(Utill.getImageDirectory(context), System.currentTimeMillis()+"image.jpg");
+        return new File(Environment.getExternalStorageDirectory(),  String.valueOf(System.currentTimeMillis()) + ".png");
+    }
 }

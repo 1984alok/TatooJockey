@@ -5,7 +5,7 @@
 
   <item
       android:id="@+id/action_toggle"
-      android:icon="@drawable/ic_archive_black_24dp"
+      android:icon="@drawable/ctgryicon"
       app:showAsAction="always"
       android:title="Show catagory"
       />

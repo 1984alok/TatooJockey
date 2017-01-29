@@ -61,6 +61,15 @@ public interface ApiInterface {
     );
 
 
+    @FormUrlEncoded
+    @POST("tattoos/share/")
+    Call<ResponseModel> callTatooShare(
+            @Field("tattoo_id") String tattoo_id,
+            @Field("user_id") String user_id,
+            @Field("social_media_type_id") String star_count
+    );
+
+
 
     @FormUrlEncoded
     @POST("user/forgot/")
@@ -73,9 +82,25 @@ public interface ApiInterface {
 
     @Multipart
     @POST("user/update/")
-    Call<ResponseModel> uploadFileWithPartMap(
+    Call<UserModel> callUpdateProfile(
             @PartMap() Map<String, RequestBody> partMap,
             @Part MultipartBody.Part file);
+
+
+    @Multipart
+    @POST("tattoos/add/")
+    Call<ResponseModel> callUploadTattoo(
+            @PartMap() Map<String, RequestBody> partMap,
+            @Part MultipartBody.Part file);
+
+
+    @FormUrlEncoded
+    @POST("user/notistatus/")
+    Call<ResponseModel> callNotificationOnOff(
+            @Field("user_id") String user_id,
+            @Field("is_notification") String is_notification
+    );
+
 
 
 }

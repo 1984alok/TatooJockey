@@ -153,7 +153,7 @@ public class UserinfoDb {
 		}else{
 			initialValues.put(USER_IMG_PATH, info.getImage());
 		}
-		return this.mDb.update(USERINFO_TABLE, initialValues, ROW_ID + " = " + info.getUserId(), null) >0;
+		return this.mDb.update(USERINFO_TABLE, initialValues, USER_ID + " = " + info.getUserId(), null) >0;
 	}
 
 
@@ -161,11 +161,11 @@ public class UserinfoDb {
 
 		String selectQuery = "SELECT * FROM " + USERINFO_TABLE;
 		//ArrayList<UserInfo> nameList = new ArrayList<UserInfo>();
-		ResponseData info = new ResponseData();
+		ResponseData info = null;
 		Cursor cur = this.mDb.rawQuery(selectQuery, null);
 		if(cur.moveToFirst()){
 			do{
-
+				info = new ResponseData();
 				info.setUserId(cur.getString(1));
 				info.setName(cur.getString(2));
 				info.setEmail(cur.getString(3));

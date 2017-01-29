@@ -49,7 +49,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
     private Animation anim,fadeAnim;
     private com.victor.loading.newton.NewtonCradleLoading ploader;
     private Settingsmanager mSettingsmanager;
-    private UserinfoDb userinfoDb;
+    //private UserinfoDb userinfoDb;
     private DBAdapter dbAdapter;
     private LinearLayout skipView;
     private TextView skipTxt,loginTxt;
@@ -178,13 +178,13 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
                 @Override
                 public void run() {
                     Intent intent;
-                    ResponseData data = getUserInfo();
+                   // ResponseData data = getUserInfo();
 
-                    if (data != null) {
-                        startNextwithValidUserData(data);
-                    } else {
+                   // if (data != null) {
+                    //    startNextwithValidUserData(data);
+                    //} else {
                         startNextwithBlankUserData();
-                    }
+                   // }
 
                 }
             }, 5000);
@@ -196,10 +196,10 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
 
         Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(UserinfoDb.USER_ID, "0");
+       /* intent.putExtra(UserinfoDb.USER_ID, "0");
         intent.putExtra(UserinfoDb.USER_NAME, "Guest");
         intent.putExtra(UserinfoDb.USER_EMAIL, "");
-        intent.putExtra(UserinfoDb.USER_IMG_PATH,"");
+        intent.putExtra(UserinfoDb.USER_IMG_PATH,"");*/
         startActivity(intent);
     }
 
@@ -207,10 +207,10 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
     private void startNextwithValidUserData(ResponseData data){
         Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
-        intent.putExtra(UserinfoDb.USER_NAME, data.getName());
-        intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
-        intent.putExtra(UserinfoDb.USER_IMG_PATH,data.getImage());
+        //intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
+        //intent.putExtra(UserinfoDb.USER_NAME, data.getName());
+       // intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
+       // intent.putExtra(UserinfoDb.USER_IMG_PATH,data.getImage());
         startActivity(intent);
     }
 
@@ -225,7 +225,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
 
 
 
-    private ResponseData  getUserInfo(){
+    /*private ResponseData  getUserInfo(){
         try {
             dbAdapter = new DBAdapter(this);
             dbAdapter.open();
@@ -241,7 +241,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
         }
 
         return null;
-    }
+    }*/
 
     private void doServerCallForCatg(){
 

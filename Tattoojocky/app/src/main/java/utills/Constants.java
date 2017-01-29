@@ -20,6 +20,14 @@ public class Constants {
     public static final String MALE = "male";
     public static final String FEMALE = "female";
 
+    public static final String NOTIOFICATION_ON = "1";
+    public static final String NOTIFICATION_OFF = "0";
+
+    public static final String FACEBOOK_SHARE = "1";
+    public static final String TWITTER_SHARE = "2";
+    public static final String INSTAGRAM_SHARE = "3";
+    public static final String YOUTUBE_SHARE = "4";
 
 
+    public static final String USER_ID = "user_id" ;
 }

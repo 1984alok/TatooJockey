@@ -4,4 +4,5 @@
     android:layout_width="?attr/actionBarSize"
     android:layout_height="?attr/actionBarSize"
     android:background="@drawable/btn_default_light"
-    android:src="@drawable/ic_archive_black_24dp" />
+    android:layout_margin="5dp"
+    android:src="@drawable/ctgryicon" />

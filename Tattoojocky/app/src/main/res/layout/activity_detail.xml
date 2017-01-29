@@ -17,16 +17,19 @@
       android:textColor="@android:color/white" />
 
   <FrameLayout
+      android:layout_below="@+id/textView"
       android:layout_width="match_parent"
-      android:layout_height="320dp"
+      android:layout_marginTop="10dp"
+      android:layout_height="match_parent"
       android:layout_centerInParent="true">
 
     <ImageView
         android:id="@+id/placeImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         android:transitionName="tImage"
+        android:src="@mipmap/ic_launcher"
         android:adjustViewBounds="true"
         android:layout_margin="2dp"/>
 

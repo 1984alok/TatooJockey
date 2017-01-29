@@ -85,14 +85,19 @@ public class ProfileScreen extends BaseActivity
         dbAdapter.open();
         mUserinfoDb = new UserinfoDb(this);
         mUserinfoDb.open();
-        userInfo = mUserinfoDb.getUserinfo();
-        setData(userInfo);
 
         backImg.setOnClickListener(this);
         editButton.setOnClickListener(this);
 
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        userInfo = mUserinfoDb.getUserinfo();
+        setData(userInfo);
+    }
 
     private void setData(ResponseData model){
 
@@ -108,13 +113,25 @@ public class ProfileScreen extends BaseActivity
         aboutMeTxt.setText(model.getAboutMe());
         String imgPath = model.getImage();
         if(imgPath!=null){
-            Picasso.with(this).load(imgPath)
-                    .error(R.drawable.ic_user)
-                    .into(userBigImg);
+            if (!TextUtils.isEmpty(imgPath)){
+                Picasso.with(this).load(imgPath)
+                        .error(R.drawable.ic_user)
+                        .into(userBigImg);
 
-            Picasso.with(this).load(imgPath)
-                    .error(R.drawable.ic_user)
-                    .into(userImg);
+                Picasso.with(this).load(imgPath)
+                        .error(R.drawable.ic_user)
+                        .into(userImg);
+            }else{
+
+                Picasso.with(this).load(R.drawable.ic_user)
+                        .error(R.drawable.ic_user)
+                        .into(userBigImg);
+
+                Picasso.with(this).load(R.drawable.ic_user)
+                        .error(R.drawable.ic_user)
+                        .into(userImg);
+            }
+
         }else{
 
         }

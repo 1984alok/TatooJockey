@@ -84,4 +84,9 @@
     <string name="title_activity_profile_scrolling">ProfileScrollingActivity</string>
     <string name="edit">Edit Profile</string>
 
+    //tattoo upload string
+    <string name="enter_tatto_name">Enter tattoo name.</string>
+    <string name="action_upload_tattoo">Upload Tattoo</string>
+    <string name="upload_tattoo">Upload Tattoo</string>
+
 </resources>

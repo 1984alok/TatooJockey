@@ -680,10 +680,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 public void run() {
                                     Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
+                                    /*intent.putExtra(UserinfoDb.USER_ID,data.getUserId() );
                                     intent.putExtra(UserinfoDb.USER_NAME, data.getName());
                                     intent.putExtra(UserinfoDb.USER_EMAIL,data.getEmail());
-                                    intent.putExtra(UserinfoDb.USER_IMG_PATH,data.getImage());
+                                    intent.putExtra(UserinfoDb.USER_IMG_PATH,data.getImage());*/
                                     startActivity(intent);
                                 }
                             },1000);

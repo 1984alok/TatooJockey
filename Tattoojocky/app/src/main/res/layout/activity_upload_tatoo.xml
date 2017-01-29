@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="applabindia.com.tattoojocky.UploadTatooActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Choose Tattoo Category."
+        android:id="@+id/textView"
+        android:layout_alignParentLeft="true"
+        android:background="@color/colorAccent"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/white"
+        android:layout_alignParentTop="true"/>
+
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinnerCatg"
+        android:layout_below="@+id/textView"
+        android:spinnerMode="dropdown"
+        android:padding="10dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:padding="5dp"
+        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Add Tattoo Image"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/spinnerCatg"
+        android:layout_alignParentLeft="true"
+        android:background="@color/colorAccent"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/white"/>
+
+    <FrameLayout
+        android:id="@+id/imageFrame"
+        android:layout_below="@+id/textView2"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true">
+        <ImageView
+            android:layout_centerHorizontal="true"
+            android:id="@+id/tattooImg"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:src="@drawable/applogo"
+            android:visibility="visible"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fabaddTatoo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:src="@drawable/ic_action_add_photo" />
+    </FrameLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_below="@+id/imageFrame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColorHint="@color/colorAccent"
+        android:id="@+id/view">
+
+        <EditText
+            android:id="@+id/edUploadTattoName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_tatto_name"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textSize="@dimen/TextSizeLarge"
+            android:textColorHint="@color/colorPrimary"
+            android:textColor="@color/black"
+            android:singleLine="true"
+            />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_upload_tattoo"
+        android:id="@+id/buttonUpload"
+        android:background="@drawable/btn_selector"
+        android:textColor="@color/white"
+        android:padding="10dp"
+        android:textSize="@dimen/TextSizeLarge"
+        android:layout_below="@+id/view"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
+
+
+</RelativeLayout>

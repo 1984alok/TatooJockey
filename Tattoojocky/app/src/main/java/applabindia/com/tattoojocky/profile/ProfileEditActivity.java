@@ -39,11 +39,15 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import applabindia.com.tattoojocky.HomeActivity;
 import applabindia.com.tattoojocky.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import database.DBAdapter;
+import database.UserinfoDb;
 import model.ResponseData;
 import model.ResponseModel;
+import model.UserModel;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -137,25 +141,34 @@ public class ProfileEditActivity extends AppCompatActivity implements
 
         edProfileEditUserName.setText(userInfo.getName());
         edProfileEditEmail.setText(userInfo.getEmail());
-        edProfileEditContact.setText(userInfo.getContact());
+        edProfileEditContact.setText(userInfo.getContact()!=null?userInfo.getContact():"");
 
-        edProfileEditCountry.setText(userInfo.getCountry());
-        edProfileEditState.setText(userInfo.getState());
-        edProfileEditCity.setText(userInfo.getCity());
-        boolean genderStatus = userInfo.getGender().equalsIgnoreCase(Constants.MALE)?true :false;
-        if(genderStatus) {
-            editProfile_radioMale.setChecked(true);
-            editProfile_radioFemale.setChecked(false);
-            gender = Constants.MALE;
-        }else{
-            editProfile_radioFemale.setChecked(true);
-            editProfile_radioMale.setChecked(false);
-            gender = Constants.FEMALE;
+        edProfileEditCountry.setText(userInfo.getCountry()!=null?userInfo.getCountry():"");
+        edProfileEditState.setText(userInfo.getState()!=null?userInfo.getState():"");
+        edProfileEditCity.setText(userInfo.getCity()!=null?userInfo.getCity():"");
+        if(userInfo.getGender()!=null) {
+            boolean genderStatus = userInfo.getGender().equalsIgnoreCase(Constants.MALE) ? true : false;
+            if (genderStatus) {
+                editProfile_radioMale.setChecked(true);
+                editProfile_radioFemale.setChecked(false);
+                gender = Constants.MALE;
+            } else {
+                editProfile_radioFemale.setChecked(true);
+                editProfile_radioMale.setChecked(false);
+                gender = Constants.FEMALE;
+            }
         }
-        editProfile_dob.setText(userInfo.getDob());
-        edProfileEditAbtMe.setText(userInfo.getAboutMe());
+        editProfile_dob.setText(userInfo.getDob()!=null?userInfo.getDob():"Date of Birth");
+        edProfileEditAbtMe.setText(userInfo.getAboutMe()!=null?userInfo.getAboutMe():"");
 
-        Picasso.with(this).load(userInfo.getImage()).error(R.drawable.ic_user).into(userImg);
+        if (!TextUtils.isEmpty(userInfo.getImage())){
+            Picasso.with(this).load(userInfo.getImage()).error(R.drawable.ic_user).into(userImg);
+        }else{
+            Picasso.with(this).load(R.drawable.ic_user)
+                    .error(R.drawable.ic_user)
+                    .into(userImg);
+        }
+
 
         // 2014-10-20
         if( userInfo.getDob()!=null&& !userInfo.getDob().equals("")&& !userInfo.getDob().equals("null")) {
@@ -221,7 +234,7 @@ public class ProfileEditActivity extends AppCompatActivity implements
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
         String date = dayOfMonth + "-" + (monthOfYear+1) + "-" + year;
         editProfile_dob.setText(date);
-      //  birthday	10/20/1985
+        //  birthday	10/20/1985
         user_dob = (monthOfYear+1)+"/"+dayOfMonth+"/"+year;
         ageOfUser = CommonUtill.getAge(year,(monthOfYear+1),dayOfMonth);
     }
@@ -301,7 +314,7 @@ public class ProfileEditActivity extends AppCompatActivity implements
         }
     }
     private void goTo3rdPage(){
-       // user_dob = editProfile_dob.getText().toString();
+        // user_dob = editProfile_dob.getText().toString();
 
         if(TextUtils.isEmpty(gender)){
             CommonUtill.showSnakbarError(this,"Please choose gender",genderRadioGrp);
@@ -347,17 +360,17 @@ public class ProfileEditActivity extends AppCompatActivity implements
     }
 
 
-    private void uploadFile( String user_id,
-                             String name,
-                             String email,
-                             String birthday,
-                             String gender,
-                             String contact,
-                             String city,
-                             String state,
-                             String country,
-                             String about_me,
-                             Uri fileUri) {
+    private void uploadFile(String user_id,
+                            String name,
+                            String email,
+                            String birthday,
+                            String gender,
+                            String contact,
+                            String city,
+                            String state,
+                            String country,
+                            String about_me,
+                            final Uri fileUri) {
 
 
         progress.show("Please wait...");
@@ -380,7 +393,7 @@ public class ProfileEditActivity extends AppCompatActivity implements
                     );
 
             // MultipartBody.Part is used to send also the actual file name
-             body =
+            body =
                     MultipartBody.Part.createFormData("image_file", file.getName(), requestFile);
         }
 
@@ -414,33 +427,75 @@ public class ProfileEditActivity extends AppCompatActivity implements
         map.put("status", statusBody);
         // add another part within the multipart request
 
-        Call<ResponseModel> call = service.uploadFileWithPartMap(map,body);
+        Call<UserModel> call = service.callUpdateProfile(map,body);
 
         // finally, execute the request
         //  Call<ResponseModel> call = service.updateProfile(user_id,name,email,birthday,gender,contact,
         //          city,state,country,about_me,description, body,"1");
-        call.enqueue(new Callback<ResponseModel>() {
+        call.enqueue(new Callback<UserModel>() {
             @Override
-            public void onResponse(Call<ResponseModel> call,
-                                   Response<ResponseModel> response) {
-                Log.v("Upload", response.body().getMessage());
+            public void onResponse(Call<UserModel> call,
+                                   Response<UserModel> response) {
+
+                if (response.isSuccessful()) {
+                    UserModel userModel = response.body();
+                    if (userModel.getStatus().equalsIgnoreCase(Constants.RESPONSE_STATUS_TRUE)) {
+                        //do next
+                        updateUserInfo(userModel.getResponseData());
+                        progress.hide();
+                        if(!TextUtils.isEmpty(fileUri.toString())){
+                            Utils.deleteFile(new File(fileUri.toString()));
+                        }
+
+                    }
+
+               /* Log.v("Upload", response.body().getMessage());
                 if(response.body().getStatus().equals(Constants.RESPONSE_STATUS_TRUE))
                     Log.v("Upload", "success");
-                progress.hide();
-               // finish();
+                progress.hide();*/
+                    // finish();
+                }
             }
 
             @Override
-            public void onFailure(Call<ResponseModel> call, Throwable t) {
+            public void onFailure(Call<UserModel> call, Throwable t) {
                 Log.e("Upload error:", t.getMessage());
                 progress.hide();
             }
         });
     }
 
+    private void updateUserInfo(ResponseData data) {
+        DBAdapter dbAdapter = null;
+        UserinfoDb userinfoDb = null;
+        if(data!=null) {
+            try {
+                dbAdapter = new DBAdapter(this);
+                dbAdapter.open();
+                userinfoDb = new UserinfoDb(this);
+                userinfoDb.open();
+                boolean status = userinfoDb.updateUserinfo(data);
+                Log.i("update status ::",""+status);
+                if (status) {
+                    CommonUtill.showSnakbarSucces(ProfileEditActivity.this,"Profile updated successfully",frameFlipper);
+                    sendBroadcast(new Intent(HomeActivity.PROFILE_UPDATED_ACTION));
+                    finish();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+
+            }finally {
+                if(userinfoDb!=null)
+                    userinfoDb.close();
+                if(dbAdapter!=null)
+                    dbAdapter.close();
+            }
+        }
+    }
+
 
     private void selectImage() {
-        final CharSequence[] items = { "Take Photo", "Choose from Library",
+        final CharSequence[] items = {"Take Photo", "Choose from Library",
                 "Cancel" };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(ProfileEditActivity.this);
@@ -465,16 +520,13 @@ public class ProfileEditActivity extends AppCompatActivity implements
 
     private void startImageCaptureIntent(){
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        file = getFile(this);
+        file = Utils.getFile(this);
         mFileUri = Uri.fromFile(file);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mFileUri );
         startActivityForResult(intent, PICK_IMAGE_FROM_CAMERA_REQUEST_ID);
     }
 
-    private File getFile(Context context){
-        //return new File(Utill.getImageDirectory(context), System.currentTimeMillis()+"image.jpg");
-        return new File(Environment.getExternalStorageDirectory(),  String.valueOf(System.currentTimeMillis()) + ".png");
-    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -679,9 +731,9 @@ public class ProfileEditActivity extends AppCompatActivity implements
 					 * (MediaStore.Images.Media.DATA);
 					 * cursor.moveToFirst();
 					 */
-                        image_path = Utils.compressImage(largeImagePath,this);
-                        System.out.println("Image path..@@@@@"
-                                + image_path);
+                    image_path = Utils.compressImage(largeImagePath,this);
+                    System.out.println("Image path..@@@@@"
+                            + image_path);
 
                     file.delete();
                 }

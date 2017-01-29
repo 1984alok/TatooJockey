@@ -72,6 +72,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
   private TextSwitcher likeCount,shareCount,dislikeCount;
   private ImageButton btnLike,btnShare,btnDislike;
   private LinearLayout ll_Like,ll_Share,ll_Dislike;
+  PhotoViewAttacher mAttacher;
 
 
   @Override
@@ -148,7 +149,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     Picasso.with(this).load(mTattoo.getTattooImage())
             .error(R.drawable.logo)
             .into(mImageView);
-    PhotoViewAttacher mAttacher = new PhotoViewAttacher(mImageView);
+    mAttacher = new PhotoViewAttacher(mImageView);
   }
 
   @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -327,6 +328,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
   public void onBackPressed() {
 
     super.onBackPressed();
+    mAttacher.cleanup();
     /*AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
     alphaAnimation.setDuration(100);
     mAddButton.startAnimation(alphaAnimation);

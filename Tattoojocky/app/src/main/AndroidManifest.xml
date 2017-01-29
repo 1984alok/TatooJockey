@@ -86,16 +86,20 @@
         <activity
             android:name=".ProfileActivity"
             android:label="@string/title_activity_profile"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".profile.ProfileScreen"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".profile.ProfileEditActivity"
+        <activity
+            android:name=".profile.ProfileEditActivity"
             android:label="@string/edit"
             android:parentActivityName=".profile.ProfileScreen"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"/>
 
-        </activity>
+        <activity android:name=".UploadTatooActivity"
+            android:label="@string/upload_tattoo"
+            android:parentActivityName=".HomeActivity"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>
