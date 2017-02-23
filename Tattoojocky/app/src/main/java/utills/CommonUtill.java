@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.view.Gravity;
 import android.view.View;
@@ -125,7 +126,7 @@ public class CommonUtill {
     public static ShareLinkContent share(String path){
 
         ShareLinkContent shareLinkContent = new ShareLinkContent.Builder()
-                .setContentTitle("TatooJockey")
+                .setContentTitle("TattooJockey")
                 .setContentDescription("For more explore, please visit")
                 .setContentUrl(Uri.parse("http://tattoojockey.com/"))
                 .setImageUrl(Uri.parse(path))
@@ -222,5 +223,10 @@ public class CommonUtill {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }
         return type;
+    }
+
+    public static String getDeviceId(Context context){
+        return Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
     }
 }

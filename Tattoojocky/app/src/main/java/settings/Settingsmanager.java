@@ -24,6 +24,7 @@ public class Settingsmanager {
 
 	// All Shared Preferences Keys
 	public static final String KEY_LOGIN_STATUS = "login_status";
+	public static final String KEY_NOTIFICATION_STATUS = "notify_status";
 
 	//tag
 	private String TAG = "Settingsmanager";
@@ -45,6 +46,17 @@ public class Settingsmanager {
 	public void setLoginStatus(boolean loginStatus) {
 
 		editor.putBoolean(KEY_LOGIN_STATUS, loginStatus);
+		editor.commit();
+	}
+
+
+	public boolean isNotifyStatus() {
+		return pref.getBoolean(KEY_NOTIFICATION_STATUS, true);
+	}
+
+
+	public void setNotifyStatus(boolean notifyStatus) {
+		editor.putBoolean(KEY_NOTIFICATION_STATUS, notifyStatus);
 		editor.commit();
 	}
 

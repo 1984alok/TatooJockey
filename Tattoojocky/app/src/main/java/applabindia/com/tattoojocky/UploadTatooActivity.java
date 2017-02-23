@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -169,6 +170,8 @@ public class UploadTatooActivity extends AppCompatActivity implements AdapterVie
 
                         }
                         CommonUtill.showSnakbarSucces(UploadTatooActivity.this,"Tattoo updated successfully",imageFrame);
+                        setResult(RESULT_OK);
+                        finish();
 
                     }
 
@@ -483,7 +486,7 @@ public class UploadTatooActivity extends AppCompatActivity implements AdapterVie
         String item = parent.getItemAtPosition(position).toString();
         tattooId = catagMap.get(item);
         // Showing selected spinner item
-        Toast.makeText(parent.getContext(), "Selected: " + item+"::tattooId::"+tattooId, Toast.LENGTH_LONG).show();
+      //  Toast.makeText(parent.getContext(), "Selected: " + item+"::tattooId::"+tattooId, Toast.LENGTH_LONG).show();
     }
 
     @Override

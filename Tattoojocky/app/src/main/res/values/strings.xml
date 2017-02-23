@@ -4,13 +4,22 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="footer_text">© 2016 ApplabIndia Inc. All rights reserved.</string>
-    <string name="interstitial_ad_unit_id">ca-app-pub-2218708156280350/8276457423</string>
+    <string name="banner_ad_unit_id">ca-app-pub-2218708156280350/1629415028</string>
+    <string name="interstial_ad_unit_id">ca-app-pub-2218708156280350/4185928623</string>
+    <string name="native_ad_unit_id">ca-app-pub-2218708156280350/5523061024</string>
+
+    <!--<string name="banner_ad_unit_id">ca-app-pub-1209727986313991/1652554262</string>
+    <string name="interstial_ad_unit_id">ca-app-pub-1209727986313991/3129287466</string>
+    <string name="native_ad_unit_id">ca-app-pub-1209727986313991/6082753868</string>-->
+
+
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
     <string name="prompt_joining_date">Joining Date</string>
     <string name="prompt_dob">Date of Birth</string>
     <string name="prompt_user_name">User Name</string>
+    <string name="full_name">Full Name</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_phone">Mob No.</string>
     <string name="prompt_gender">Gender</string>
@@ -88,5 +97,9 @@
     <string name="enter_tatto_name">Enter tattoo name.</string>
     <string name="action_upload_tattoo">Upload Tattoo</string>
     <string name="upload_tattoo">Upload Tattoo</string>
+    <string name="testDeviceID">736B8BBE5F5D34A682BB1FB44A04DABD</string>
+    <string name="update">Update</string>
+    <string name="termconditionlink">Terms and Conditions</string>
+    <string name="version">version v 1.0</string>
 
 </resources>

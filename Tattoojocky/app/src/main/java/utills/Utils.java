@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -60,13 +62,6 @@ public class Utils {
     }
 
 
-    public static File getImageDirectory(Context context) {
-        final File path = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName()+"/image");
-        if (!path.exists()) {
-            path.mkdir();
-        }
-        return path;
-    }
 
 
 
@@ -94,7 +89,11 @@ public class Utils {
 //  	width and height values are set maintaining the aspect ratio of the image
 
         if (actualHeight > maxHeight || actualWidth > maxWidth) {
-            if (imgRatio < maxRatio) {           	imgRatio = maxHeight / actualHeight;            	actualWidth = (int) (imgRatio * actualWidth);           	actualHeight = (int) maxHeight;         	} else if (imgRatio > maxRatio) {
+            if (imgRatio < maxRatio) {
+                imgRatio = maxHeight / actualHeight;
+                actualWidth = (int) (imgRatio * actualWidth);
+                actualHeight = (int) maxHeight;
+            } else if (imgRatio > maxRatio) {
                 imgRatio = maxWidth / actualWidth;
                 actualHeight = (int) (imgRatio * actualHeight);
                 actualWidth = (int) maxWidth;
@@ -184,9 +183,28 @@ public class Utils {
 
     }
 
+   /* public static String getFilename(Context context) {
+        File file = new File(Environment.getExternalStorageDirectory().getPath(), "Android/data/" + context.getPackageName()+"/image");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String uriSting = (file.getAbsolutePath() + "/" + System.currentTimeMillis() + ".png");
+        return uriSting;
+
+    }*/
+
+    public static File getImageDirectory(Context context) {
+         File file = new File(Environment.getExternalStorageDirectory().getPath(), "Android/data/" + context.getPackageName()+"/image");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        return file;
+    }
+
 
     public static String getFilename(Context ctx) {
-        File file = getImageDirectory(ctx);
+
+        File file = Utils.getImageDirectory(ctx);
         String uriSting = (file.getAbsolutePath() + "/" + System.currentTimeMillis() + ".png");
         return uriSting;
 

@@ -16,6 +16,11 @@ import android.widget.TextView;
 
 import com.facebook.FacebookSdk;
 import com.facebook.share.widget.ShareDialog;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.NativeExpressAdView;
+import com.google.android.gms.ads.VideoController;
+import com.google.android.gms.ads.VideoOptions;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -27,20 +32,23 @@ import applabindia.com.tattoojocky.RecyclerViewPositionHelper;
 import listener.OnLoadMoreListener;
 import model.TattooInfo;
 import utills.CommonUtill;
+import utills.Constants;
 
 
 public class TattooListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
   public static final int VIEW_TYPE_ITEM = 0;
   public static final int VIEW_TYPE_LOADING = 1;
+  public static final int NATIVE_EXPRESS_AD_VIEW_TYPE=2;
   private OnLoadMoreListener mOnLoadMoreListener;
   private RecyclerView mRecyclerView;
   private int lastVisibleItem, totalItemCount;
   private boolean isLoading;
   private int visibleThreshold = 2;
-  RecyclerViewPositionHelper mRecyclerViewHelper;
+  public RecyclerViewPositionHelper mRecyclerViewHelper;
 
   Context mContext;
+  HomeActivity activity;
   OnItemClickListener mItemClickListener;
   ArrayList<TattooInfo.ResponseDato> dataList;
   public  boolean isShowingListView;
@@ -50,13 +58,17 @@ public class TattooListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
   public static final int VIEW_TYPE_DEFAULT = 1;
   public static final int VIEW_TYPE_LOADER = 2;
   TattooInfo.ResponseDato data;
+  public boolean allLoaded;
+
 
   public TattooListAdapter(Context context,ArrayList<TattooInfo.ResponseDato> dataList,
                            boolean isShowingListView,RecyclerView mRecyclerView) {
     this.mContext = context;
+    activity = (HomeActivity)mContext;
     this.dataList = dataList;
     this.isShowingListView = isShowingListView;
     this.mRecyclerView = mRecyclerView;
+    allLoaded = false;
     mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
       @Override
       public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -67,8 +79,10 @@ public class TattooListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         Log.d("lastVisibleItem :: ",mRecyclerViewHelper.findLastCompletelyVisibleItemPosition()+"findLastVisibleItemPosition :: "+mRecyclerViewHelper.findLastVisibleItemPosition());
 
         if (!isLoading && totalItemCount < (lastVisibleItem + visibleThreshold)) {
+          Log.d("Calling..","prev allLoaded ::"+allLoaded);
           if (mOnLoadMoreListener != null) {
             mOnLoadMoreListener.onLoadMore();
+            Log.d("Calling..","onLoadMore");
           }
           isLoading = true;
         }
@@ -78,7 +92,14 @@ public class TattooListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
   @Override
   public int getItemViewType(int position) {
-    return dataList.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
+    // return dataList.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
+    if(dataList.get(position)==null){
+      return VIEW_TYPE_LOADING;
+    }else if(dataList.get(position).getTattooCateId().equals(Constants.ADD_CATG)){
+      return  NATIVE_EXPRESS_AD_VIEW_TYPE;
+    }else{
+      return VIEW_TYPE_ITEM;
+    }
   }
 
   @Override
@@ -93,6 +114,11 @@ public class TattooListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
       View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_loading_item, parent, false);
       return new LoadingViewHolder(view);
+    }else if(viewType==NATIVE_EXPRESS_AD_VIEW_TYPE){
+      View nativeExpressLayoutView = LayoutInflater.from(
+              parent.getContext()).inflate(R.layout.native_express_ad_container,
+              parent, false);
+      return new NativeExpressAdViewHolder(nativeExpressLayoutView);
     }
     return null;
 
@@ -101,29 +127,92 @@ public class TattooListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
   @Override
   public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
 
+    data = dataList.get(position);
+    if(data!=null) {
+      if (position > 4 && position % 4 == 0 && !data.getTattooCateId().equals(Constants.ADD_CATG) && isShowingListView) {
+        activity.addAddvertiseTattoo(position);
+      } else if (data.getTattooCateId().equals(Constants.ADD_CATG) && !isShowingListView) {
+        activity.removeAddvertiseTattoo(position);
+      }
+    }
+
+
     if (holder instanceof ViewHolder) {
       Log.i("adapter","onBindViewHolder ViewHolder::"+position);
-      data = dataList.get(position);
-      ((ViewHolder) holder).placeName.setText(data.getTattooName());
-      Picasso.with(mContext).load(data.getTattooImage())
-              .placeholder(R.drawable.progress_animation)
-              .error(R.drawable.applogo)
-              .into(((ViewHolder) holder).placeImage);
-      ((ViewHolder) holder).likeCount.setCurrentText(data.getTattooLikes());
-      ((ViewHolder) holder).dislikeCount.setCurrentText(data.getTattooDislikes());
-      ((ViewHolder) holder).shareCount.setCurrentText(data.getShareCount());
-      ((ViewHolder) holder).btnLike.setImageResource(data.getIsLiked() == 1 ? R.drawable.ic_heart_red : R.drawable.ic_heart_outline_grey);
-
+      if(data!=null) {
+        ((ViewHolder) holder).placeName.setText(data.getTattooName());
+        Picasso.with(mContext).load(data.getTattooImage())
+               // .placeholder(R.drawable.progress_animation)
+                .error(R.drawable.applogo)
+                .into(((ViewHolder) holder).placeImage);
+        ((ViewHolder) holder).likeCount.setCurrentText(data.getTattooLikes());
+        ((ViewHolder) holder).dislikeCount.setCurrentText(data.getTattooDislikes());
+        ((ViewHolder) holder).shareCount.setCurrentText(data.getShareCount());
+        ((ViewHolder) holder).btnLike.setImageResource(data.getIsLiked() == 1 ? R.drawable.ic_heart_red : R.drawable.ic_heart_outline_grey);
+      }
     }else if(holder instanceof LoadingViewHolder) {
       Log.i("adapter","onBindViewHolder LoadingViewHolder::"+position);
       LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
       loadingViewHolder.progressBar.start();
+    }else if(holder instanceof NativeExpressAdViewHolder){
+
+      NativeExpressAdViewHolder addHolder = (NativeExpressAdViewHolder) holder;
+      // Set its video options.
+      addHolder. mAdView.setVideoOptions(new VideoOptions.Builder()
+              .setStartMuted(true)
+              .build());
+
+      // The VideoController can be used to get lifecycle events and info about an ad's video
+      // asset. One will always be returned by getVideoController, even if the ad has no video
+      // asset.
+      final VideoController mVideoController = addHolder.mAdView.getVideoController();
+      mVideoController.setVideoLifecycleCallbacks(new VideoController.VideoLifecycleCallbacks() {
+        @Override
+        public void onVideoEnd() {
+          Log.d("Add", "Video playback is finished.");
+          super.onVideoEnd();
+        }
+      });
+
+      // Set an AdListener for the AdView, so the Activity can take action when an ad has finished
+      // loading.
+      addHolder.mAdView.setAdListener(new AdListener() {
+        @Override
+        public void onAdLoaded() {
+          if (mVideoController.hasVideoContent()) {
+            Log.d("Add", "Received an ad that contains a video asset.");
+          } else {
+            Log.d("Add", "Received an ad that does not contain a video asset.");
+          }
+        }
+      });
+
+      addHolder.mAdView.loadAd(new AdRequest.Builder()
+             // .addTestDevice("736B8BBE5F5D34A682BB1FB44A04DABD")
+              .build());
     }
   }
 
   @Override
   public int getItemCount() {
     return dataList == null ? 0 : dataList.size();
+  }
+
+
+
+
+  /**
+   * The {@link NativeExpressAdViewHolder} class.
+   */
+  public class NativeExpressAdViewHolder extends RecyclerView.ViewHolder {
+
+    NativeExpressAdView mAdView;
+    VideoController mVideoController;
+
+    NativeExpressAdViewHolder(View view) {
+      super(view);
+      mAdView = (NativeExpressAdView)view.findViewById(R.id.adView);
+    }
   }
 
   public class LoadingViewHolder extends RecyclerView.ViewHolder {

@@ -30,6 +30,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -99,6 +100,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private TextView skipTxt,forgotPwdTxtSignViw,forgotPwdTxtSigninViw,txt_forgot_pwd_cancel;
     private AutoCompleteTextView ed_forgot_pwd;
     private Button send;
+    private CheckBox tcCheckBox;
 
 
 
@@ -113,9 +115,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mEmailViewSignup = (AutoCompleteTextView) findViewById(R.id.emailSignUp);
         ed_forgot_pwd = (AutoCompleteTextView) findViewById(R.id.ed_forgot_pwd_email);
-
         skipTxt = (TextView)findViewById(R.id.skip);
-
+        tcCheckBox = (CheckBox)findViewById(R.id.tcCheckbox);
         mEmailView.setThreshold(1);
         mEmailViewSignup.setThreshold(1);
         ed_forgot_pwd.setThreshold(1);
@@ -330,6 +331,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cPasswordSignup.setError(getString(R.string.confirm_password_notequal));
             focusView = cPasswordSignup;
             cancel = true;
+        }else if(!tcCheckBox.isChecked()){
+            focusView = tcCheckBox;
+            cancel = true;
+            CommonUtill.showSnakbarError(this,"Please check the terms and conditions",tcCheckBox);
         }
 
         if (cancel) {
@@ -646,7 +651,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onStop() {
         super.onStop();
-        finish();
+       // finish();
     }
 
 
@@ -796,6 +801,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+    }
+
+
+    public void handleLink(View v){
+        startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("http://www.tattoojockey.com/terms.php")));
     }
 }
 

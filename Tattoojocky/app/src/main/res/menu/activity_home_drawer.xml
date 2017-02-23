@@ -27,5 +27,12 @@
                 app:actionLayout="@layout/notification_menu_layout"/>
         </menu>
     </item>
+    <item android:title="">
+        <menu>
+            <item
+                android:id="@+id/version"
+                android:title="@string/version"/>
+        </menu>
+    </item>
 
 </menu>

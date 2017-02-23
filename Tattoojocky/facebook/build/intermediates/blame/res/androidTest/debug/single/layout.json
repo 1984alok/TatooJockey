@@ -112,12 +112,12 @@
         "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\layout\\abc_screen_toolbar.xml"
     },
     {
-        "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\notification_action.xml",
-        "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\layout\\notification_action.xml"
-    },
-    {
         "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\com_facebook_smart_device_dialog_fragment.xml",
         "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\bundles\\debug\\res\\layout\\com_facebook_smart_device_dialog_fragment.xml"
+    },
+    {
+        "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\notification_action.xml",
+        "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\layout\\notification_action.xml"
     },
     {
         "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\abc_screen_simple_overlay_action_mode.xml",

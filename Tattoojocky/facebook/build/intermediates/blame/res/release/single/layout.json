@@ -112,20 +112,20 @@
         "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\layout\\abc_alert_dialog_button_bar_material.xml"
     },
     {
-        "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\release\\layout\\support_simple_spinner_dropdown_item.xml",
-        "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\layout\\support_simple_spinner_dropdown_item.xml"
-    },
-    {
         "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\release\\layout\\com_facebook_smart_device_dialog_fragment.xml",
         "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\src\\main\\res\\layout\\com_facebook_smart_device_dialog_fragment.xml"
     },
     {
-        "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\release\\layout\\abc_expanded_menu_layout.xml",
-        "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\layout\\abc_expanded_menu_layout.xml"
+        "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\release\\layout\\support_simple_spinner_dropdown_item.xml",
+        "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\layout\\support_simple_spinner_dropdown_item.xml"
     },
     {
         "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\release\\layout\\com_facebook_device_auth_dialog_fragment.xml",
         "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\src\\main\\res\\layout\\com_facebook_device_auth_dialog_fragment.xml"
+    },
+    {
+        "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\release\\layout\\abc_expanded_menu_layout.xml",
+        "source": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\layout\\abc_expanded_menu_layout.xml"
     },
     {
         "merged": "D:\\TatooJockey\\Tattoojocky\\facebook\\build\\intermediates\\res\\merged\\release\\layout\\notification_action.xml",

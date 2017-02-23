@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -14,8 +15,16 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.Map;
 
 import applabindia.com.tattoojocky.R;
+import applabindia.com.tattoojocky.SplashActivity;
+import settings.Settingsmanager;
 
 /**
  * Created by Alok on 26-11-2016.
@@ -43,10 +52,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-
+        JSONObject object = null;
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+            Map<String, String> params = remoteMessage.getData();
+            object = new JSONObject(params);
+            Log.e("JSON_OBJECT", object.toString());
         }
 
         // Check if message contains a notification payload.
@@ -54,7 +66,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }
 
-        sendNotification(remoteMessage.getNotification().getBody()+"####"+remoteMessage.getData());
+        if(new Settingsmanager(this).isNotifyStatus()) {
+            if (object != null)
+                sendNotification(object);
+        }
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
     }
@@ -65,20 +80,49 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      *
      * @param messageBody FCM message body received.
      */
-    private void sendNotification(String messageBody) {
+    private void sendNotification(JSONObject messageBody) {
+        String tittle = messageBody.optString("title");
+        String body = messageBody.optString("body");
+        String imgUrl = messageBody.optString("icon");
+       // String imgUrl = "https://s-media-cache-ak0.pinimg.com/736x/83/11/02/8311022f2dae9634c8c5c6954ba80505.jpg";
+
         Intent intent = new Intent();
+        intent.setClass(MyFirebaseMessagingService.this, SplashActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.logo)
-                .setContentTitle("FCM Message")
-                .setContentText(messageBody)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+        NotificationCompat.Builder notificationBuilder = null;
+        try {
+            notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.ic_launcher)
+                    .setContentTitle(tittle)
+                    .setContentText(body)
+                    .setAutoCancel(true)
+                    .setSound(defaultSoundUri)
+                    .setContentIntent(pendingIntent)
+                    .setLargeIcon(imgUrl.equalsIgnoreCase("") ? BitmapFactory.decodeResource(
+                            getResources(), R.drawable.ic_launcher)
+                            : Picasso.with(MyFirebaseMessagingService.this).load(imgUrl).get())
+                    //BigPicture Style
+                    .setStyle(new NotificationCompat.BigPictureStyle()
+                            //This one is same as large icon but it wont show when its expanded that's why we again setting
+                            .bigLargeIcon(imgUrl.equalsIgnoreCase("") ? BitmapFactory.decodeResource(
+                                    getResources(), R.drawable.ic_launcher)
+                                    : Picasso.with(MyFirebaseMessagingService.this).load(imgUrl).get())
+                            //This is Big Banner image
+                            .bigPicture(imgUrl.equalsIgnoreCase("") ? BitmapFactory.decodeResource(
+                                    getResources(), R.drawable.ic_launcher)
+                                    : Picasso.with(MyFirebaseMessagingService.this).load(imgUrl).get())
+                            //When Notification expanded title and content text
+                            .setBigContentTitle(tittle)
+                            .setSummaryText(body)
+                    );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

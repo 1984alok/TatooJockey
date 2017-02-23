@@ -1,58 +1,27 @@
 {
   "project_info": {
-    "project_number": "528653028058",
-    "firebase_url": "https://cool-album-106018.firebaseio.com",
-    "project_id": "cool-album-106018",
-    "storage_bucket": "cool-album-106018.appspot.com"
+    "project_number": "583396681399",
+    "firebase_url": "https://tattoojockey-ea8de.firebaseio.com",
+    "project_id": "tattoojockey-ea8de",
+    "storage_bucket": "tattoojockey-ea8de.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:528653028058:android:cb56a7d056ba4167",
-        "android_client_info": {
-          "package_name": "alessandro.firebaseandroid"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "528653028058-1ses3a7jj6i8ag8c5hfvc8hte03afdnm.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCHYdip4k7kMWVuAKZPiyEk9evNeO5Q5Ts"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:528653028058:android:82c57ef9da174321",
+        "mobilesdk_app_id": "1:583396681399:android:82c57ef9da174321",
         "android_client_info": {
           "package_name": "applabindia.com.tattoojocky"
         }
       },
       "oauth_client": [
         {
-          "client_id": "528653028058-1ses3a7jj6i8ag8c5hfvc8hte03afdnm.apps.googleusercontent.com",
+          "client_id": "583396681399-jti1jqa8ojhsfa0q18iuueec429mng23.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCHYdip4k7kMWVuAKZPiyEk9evNeO5Q5Ts"
+          "current_key": "AIzaSyBUeEvfIfnCRxfhSAadYqxVKBTbQB9rK4Y"
         }
       ],
       "services": {

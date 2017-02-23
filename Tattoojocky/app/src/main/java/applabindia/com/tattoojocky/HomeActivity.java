@@ -48,6 +48,7 @@ import com.facebook.share.widget.ShareDialog;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.mingle.entity.MenuEntity;
 import com.mingle.sweetpick.DimEffect;
@@ -92,6 +93,8 @@ public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     //Add Implementation
     private InterstitialAd mInterstitialAd;
+    private AdView mAdViewBanner;
+    LinearLayout bannerAddFrame;
     private Timer timerTask = null;
     Toolbar toolbar;
     ImageView ivLogo;
@@ -126,6 +129,7 @@ public class HomeActivity extends AppCompatActivity
     private RecyclerView mRecyclerView;
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
     private TattooListAdapter mAdapter;
+    public int lastPosition = 0;
     private boolean isListView;
     private ArrayList<TattooInfo.ResponseDato> tatoInfoList;
     private ApiInterface apiService;
@@ -140,12 +144,31 @@ public class HomeActivity extends AppCompatActivity
 
     public static String PROFILE_UPDATED_ACTION ="profile_updated";
     BroadcastReceiver profileUpdateReceiver ;
+    private static  final int UPLOAD_REQUEST = 123;
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode==UPLOAD_REQUEST&&resultCode==RESULT_OK) {
+            if (NetworkStatus.getInstance().isConnected(this)) {
+                tatoInfoList.clear();
+                //mAdapter.notifyDataSetChanged();
+                tattoPagesCount = 0;
+                getTattoos(tattooCatId, String.valueOf(++tattoPagesCount), userId);
+            } else {
+                showRefreshImg();
+                CommonUtill.showSnakbarError(this, "Check your network connection.", container);
+            }
+        }
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(profileUpdateReceiver,new IntentFilter(PROFILE_UPDATED_ACTION));
+        if (mAdViewBanner != null) {
+            mAdViewBanner.resume();
+        }
     }
 
 
@@ -215,12 +238,14 @@ public class HomeActivity extends AppCompatActivity
         profileMenuItem = sideMenu.findItem(R.id.nav_profile);
         logOutMenuItem = sideMenu.findItem(R.id.nav_logout);
         notificationSwitch = (SwitchCompat) sideMenu.findItem(R.id.nav_noti).getActionView().findViewById(R.id.drawer_switch);
+        notificationSwitch.setChecked(settingsmanager.isNotifyStatus());
         notificationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 //Toast.makeText(HomeActivity.this,""+notificationSwitch.isChecked(),Toast.LENGTH_LONG).show();
                 String status = isChecked?Constants.NOTIOFICATION_ON:Constants.NOTIFICATION_OFF;
-                doCallOnOffNotification(userId,status);
+                // doCallOnOffNotification(userId,status);
+                settingsmanager.setNotifyStatus(isChecked);
             }
         });
 
@@ -257,17 +282,12 @@ public class HomeActivity extends AppCompatActivity
         toggle.syncState();
         toolbar.setNavigationIcon(R.drawable.ic_menu_black_24dp);
 
+
         //NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //init
-
-
-
-        // Create the InterstitialAd and set the adUnitId (defined in values/strings.xml).
-        mInterstitialAd = newInterstitialAd();
-        loadInterstitial();
-        // startTimer();
+        // initInterstilalAdd();
+        initBannerAdd();
 
         setupTattoCatagView(getTattoCatg());
 
@@ -299,7 +319,34 @@ public class HomeActivity extends AppCompatActivity
         };
     }
 
+    private void initBannerAdd() {
 
+        mAdViewBanner = (AdView) findViewById(R.id.adViewBanner);
+        bannerAddFrame = (LinearLayout) findViewById(R.id.bannerAddFrame);
+        AdRequest adRequest = new AdRequest.Builder()
+                // .setRequestAgent("android_studio:ad_template")
+                // .addTestDevice("736B8BBE5F5D34A682BB1FB44A04DABD")
+                .build();
+        mAdViewBanner.loadAd(adRequest);
+        mAdViewBanner.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                bannerAddFrame.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                bannerAddFrame.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void initInterstilalAdd() {
+        // Create the InterstitialAd and set the adUnitId (defined in values/strings.xml).
+        mInterstitialAd = newInterstitialAd();
+        loadInterstitial();
+        //  startTimer();
+    }
 
 
     private void initUser(){
@@ -354,6 +401,7 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onLoadMore() {
                 Log.e("haint", "Load More");
+                // if(!mAdapter.allLoaded) {
                 tatoInfoList.add(null);
                 // mRecyclerView.setLayoutManager(new LinearLayoutManager(HomeActivity.this));
                 mAdapter.notifyItemInserted(tatoInfoList.size() - 1);
@@ -363,10 +411,13 @@ public class HomeActivity extends AppCompatActivity
                     @Override
                     public void run() {
                         //Load more data for reyclerview
-                        getTattoos(tattooCatId,String.valueOf(++tattoPagesCount),userId);
+                        getTattoos(tattooCatId, String.valueOf(++tattoPagesCount), userId);
                     }
-                },1000);
-
+                }, 1000);
+               /* }else{
+                    CommonUtill.showSnakbarError(HomeActivity.this,"Tattoo could n't found."+getResources().getString(R.string.thats_all),container);
+                }
+*/
 
             }
         });
@@ -414,7 +465,7 @@ public class HomeActivity extends AppCompatActivity
                 ((RecyclerViewDelegate) mSweetSheet.getDelegate()).notifyDataSetChanged();
                 mSweetSheet.toggle();
                 getTattooInfoById(tattocatagMap.get(menuEntity1.title).getCateId());
-                Toast.makeText(HomeActivity.this, tattocatagMap.get(menuEntity1.title).getCateId(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(HomeActivity.this, tattocatagMap.get(menuEntity1.title).getCateId(), Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
@@ -427,6 +478,8 @@ public class HomeActivity extends AppCompatActivity
     private void setUpActionBar() {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
     }
 
@@ -505,7 +558,7 @@ public class HomeActivity extends AppCompatActivity
 
     private InterstitialAd newInterstitialAd() {
         InterstitialAd interstitialAd = new InterstitialAd(this);
-        interstitialAd.setAdUnitId(getString(R.string.interstitial_ad_unit_id));
+        interstitialAd.setAdUnitId(getString(R.string.interstial_ad_unit_id));
         interstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
@@ -544,6 +597,17 @@ public class HomeActivity extends AppCompatActivity
                 .build();
 
         mInterstitialAd.loadAd(adRequest);
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                super.onAdClosed();
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                super.onAdFailedToLoad(i);
+            }
+        });
     }
 
     private void goToNextLevel() {
@@ -606,16 +670,25 @@ public class HomeActivity extends AppCompatActivity
             item.setTitle("Show as grid");
             isListView = false;
 
+
         } else {
             mStaggeredLayoutManager.setSpanCount(1);
             item.setIcon(R.drawable.ic_list);
             item.setTitle("Show as list");
             isListView = true;
         }
-
+      //  lastPosition = mAdapter.mRecyclerViewHelper.findLastCompletelyVisibleItemPosition();
         supportInvalidateOptionsMenu();
         mAdapter.updateListGridView(isListView);
         mRecyclerView.setAdapter(mAdapter);
+       /* if(lastPosition!=0)
+            mRecyclerView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mRecyclerView.smoothScrollToPosition(lastPosition);
+                }
+            },200);*/
+
         //mRecyclerView.setItemAnimator(new FeedItemAnimator());
     }
 
@@ -649,8 +722,13 @@ public class HomeActivity extends AppCompatActivity
                 startActivity(new Intent(HomeActivity.this,ProfileScreen.class));
             }
         } else if (id == R.id.nav_upload_tattoo) {
+            if(userId!=null&&!userId.equalsIgnoreCase("0")){
+                startActivityForResult(new Intent(HomeActivity.this,UploadTatooActivity.class).putExtra(Constants.USER_ID,userId),UPLOAD_REQUEST);
+                //showSnackbar("Liked!");
+            }else{
+                showSnackbar("Please log in first.");
+            }
 
-            startActivity(new Intent(HomeActivity.this,UploadTatooActivity.class).putExtra(Constants.USER_ID,userId));
 
         } else if (id == R.id.nav_logout) {
             try {
@@ -677,12 +755,25 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+
         unregisterReceiver(profileUpdateReceiver);
         if (userinfoDb!=null)
             userinfoDb.close();
         if (dbAdapter!=null)
             dbAdapter.close();
+
+        if (mAdViewBanner != null) {
+            mAdViewBanner.destroy();
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        if (mAdViewBanner != null) {
+            mAdViewBanner.pause();
+        }
+        super.onPause();
     }
 
     public void startTimer() {
@@ -878,6 +969,10 @@ public class HomeActivity extends AppCompatActivity
                         //do next
                         Log.i("onSuccess msg",response.message()+" tattoPagesCount ::" + tattoPagesCount);
                         if(tattooInfo.getResponseData().size()>0) {
+
+                            /*if(tatoInfoList.size()>6){
+                                tatoInfoList.add(tatoInfoList.size()-1,addAddvertiseTattoo());
+                            }*/
                             tatoInfoList.addAll(tattooInfo.getResponseData());
                             mAdapter.notifyDataSetChanged();
                             if (mRecyclerView.getVisibility() == View.GONE) {
@@ -889,6 +984,7 @@ public class HomeActivity extends AppCompatActivity
                             if (tattoPagesCount >= 2) {
                                 mAdapter.setLoaded();
                             }
+                            mAdapter.allLoaded=false;
                         }
                     }else{
                         CommonUtill.showSnakbarError(HomeActivity.this,tattooInfo.getMessage()
@@ -897,6 +993,7 @@ public class HomeActivity extends AppCompatActivity
                         if(tattoPagesCount>=2) {
                             mAdapter.setLoaded();
                         }
+                        mAdapter.allLoaded=true;
                     }
                 }else{
                     Log.i("onFailure Error",response.message());
@@ -981,21 +1078,21 @@ public class HomeActivity extends AppCompatActivity
         if( data.getShareCount()!=null) {
             shareCount = Integer.parseInt(data.getShareCount());
         }
-            shareCount = ++shareCount;
-            data.setShareCount(String.valueOf(shareCount));
-            mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_IMAGE_CLICKED);
-            ShareDialog.show(HomeActivity.this, CommonUtill.share(data.getTattooImage()));
+        shareCount = ++shareCount;
+        data.setShareCount(String.valueOf(shareCount));
+        mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_IMAGE_CLICKED);
+        ShareDialog.show(HomeActivity.this, CommonUtill.share(data.getTattooImage()));
     }
 
     private void doForLike( TattooInfo.ResponseDato data,int position){
         int likeCount=0;
-       if( data.getTattooLikes()!=null) {
-           likeCount = Integer.parseInt(data.getTattooLikes());
-       }
-           // likeCount = ++likeCount;
-           data.setTattooLikes(String.valueOf(++likeCount));
-           data.setIsLiked(1);
-           mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_BUTTON_CLICKED);
+        if( data.getTattooLikes()!=null) {
+            likeCount = Integer.parseInt(data.getTattooLikes());
+        }
+        // likeCount = ++likeCount;
+        data.setTattooLikes(String.valueOf(++likeCount));
+        data.setIsLiked(1);
+        mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_BUTTON_CLICKED);
 
     }
 
@@ -1005,10 +1102,10 @@ public class HomeActivity extends AppCompatActivity
         if( data.getTattooDislikes()!=null) {
             disLikeCount = Integer.parseInt(data.getTattooDislikes());
         }
-            //likeCount = --likeCount;
-            data.setTattooDislikes(String.valueOf(++disLikeCount));
-            data.setIsLiked(0);
-            mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_IMAGE_CLICKED);
+        //likeCount = --likeCount;
+        data.setTattooDislikes(String.valueOf(++disLikeCount));
+        data.setIsLiked(0);
+        mAdapter.notifyItemChanged(position, TattooListAdapter.ACTION_LIKE_IMAGE_CLICKED);
     }
 
 
@@ -1073,10 +1170,14 @@ public class HomeActivity extends AppCompatActivity
                         hideProgressDlg();
                         //do next
                         CommonUtill.showSnakbarError(HomeActivity.this,responseModel.getMessage(),container);
+                        settingsmanager.setNotifyStatus(true);
+
 
                     }else{
                         hideProgressDlg();
                         CommonUtill.showSnakbarError(HomeActivity.this,responseModel.getMessage(),container);
+                        settingsmanager.setNotifyStatus(false);
+                        notificationSwitch.setChecked(false);
                     }
                 }else{
                     Log.i("onFailure Error",response.message());
@@ -1088,8 +1189,8 @@ public class HomeActivity extends AppCompatActivity
                         //  Log.d("error message", error.getMessage());
                     }
                     hideProgressDlg();
-
-
+                    settingsmanager.setNotifyStatus(false);
+                    notificationSwitch.setChecked(false);
                 }
             }
 
@@ -1097,6 +1198,8 @@ public class HomeActivity extends AppCompatActivity
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("onFailure Error",t.toString());
                 hideProgressDlg();
+                settingsmanager.setNotifyStatus(false);
+                notificationSwitch.setChecked(false);
             }
         });
     }
@@ -1153,6 +1256,34 @@ public class HomeActivity extends AppCompatActivity
             dlg.dismiss();
         }
     }
+
+
+    public void addAddvertiseTattoo(final int pos){
+
+        mRecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                TattooInfo.ResponseDato model = new TattooInfo().new ResponseDato();
+                model.setTattooCateId(Constants.ADD_CATG);
+                tatoInfoList.add(pos,model);
+                mAdapter.notifyItemInserted(pos);
+            }
+        });
+    }
+
+
+    public void removeAddvertiseTattoo(final int pos){
+        mRecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                tatoInfoList.remove(pos);
+                mAdapter.notifyItemRemoved(pos);
+            }
+        });
+
+    }
+
+
 
 
 
